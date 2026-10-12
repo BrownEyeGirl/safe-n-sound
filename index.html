@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>DREAMS</title>
+    <style>
+      body { margin: 0; }
+
+      @font-face {
+    font-family: 'Andale Mono';
+    src: url('assets/AndaleMono.ttf') format('truetype');
+  }
+
+  #rever {
+    position: fixed;
+    top: 57%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    font-family: 'Andale Mono', monospace;
+    font-size: 96px;
+    color: white;
+    text-shadow: 0 0 20px rgba(0,0,0,0.1);
+    opacity: 0;
+    transition: opacity 6s ease;
+    z-index: 9998;
+    pointer-events: none;
+    letter-spacing: 2.3em;
+  }
+
+    </style>
+
+<link rel="stylesheet" href="style.css">
+  <script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/",
+        "postprocessing": "https://unpkg.com/postprocessing@6.38.2/build/index.js"
+
+  }
+}
+</script>
+
+<script src="https://threejs.org/build/three.min.js"></script>
+ <script type="module" src="main.js" id="appScript"></script>
+ <script src="https://unpkg.com/tone@latest/build/Tone.js"></script>
+
+ <script>
+  /*const fadeOverlay=document.getElementById("fade"); 
+
+  document.addEventListener("keydown", (event) => {
+
+  if (event.code === "Space") {
+    window.location.href = "scene5.html";
+  }
+
+}); 
+
+
+// music 
+let playing = false; 
+
+
+function playMelody() {
+
+  
+ // synth 
+
+  const reverb = new Tone.Reverb({
+    decay: 4,
+    wet: 0.6
+  }).toDestination();
+
+  const panner = new Tone.Panner3D({
+    positionX: 0,
+    positionY: 0,
+    positionZ: 0
+  }).connect(reverb);
+
+  const synth = new Tone.Synth({
+    oscillator: { type: "sawtooth" },
+    envelope: {
+      attack: 0.5,
+      decay: 0.5,
+      sustain: 0.15,
+      release: 1
+    }
+  }).connect(panner);
+
+  const notes = ["C4", "E4", "G4", "A4", "C5"];
+
+  const loop = new Tone.Loop((time) => {
+    const note = notes[Math.floor(Math.random() * notes.length)];
+    synth.triggerAttackRelease(note, "1n", time);
+  }, "1m");
+
+  loop.start(0);
+
+  Tone.Transport.start();
+}
+
+document.addEventListener("click", async () => {
+  
+    await Tone.start();
+      playMelody();
+      setTimeout(() => {
+        playMelody();
+      }, 150)
+  
+});
+*/
+
+
+
+ </script>
+</script>
+  </head>
+  <body style="background-color: rgb(0, 0, 0);">
+  </body>
+</html>

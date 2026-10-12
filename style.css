@@ -1,0 +1,26 @@
+/** 
+CSS FOR MY VIDEOGAME!!! 
+*/
+
+/* Fade in */ 
+#title {
+    position:absolute; 
+    display: flex; 
+    justify-content: center; 
+    align-items:center; 
+    width:100%; 
+    height:100%; 
+}
+#fade {
+  position: fixed;
+  inset: 0;
+  background: black;
+  pointer-events: none;
+  z-index: 9999;
+  animation: fadeOut 3s ease forwards;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
