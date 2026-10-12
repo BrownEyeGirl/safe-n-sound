@@ -30,22 +30,49 @@ function perlin(x, y) {
 }
 
 // --- Height at any world position ---
-const MAX_HEIGHT = 60;   // height of the tallest mountains
+const MAX_HEIGHT = 50;   // height of the tallest mountains
 const FIELD_RADIUS = 1500; // distance from the center where the ground becomes totally flat
 
+const PEAK_HEIGHT = 120; // how tall the central peak is, on top of the other mountains
+const PEAK_RADIUS = 120; // how wide its base is
+
+const FLAT_TOP = 150; // the peak's height; anything higher gets sliced flat
+const PLATEAU_HEIGHT = 150; // height of the flat summit
+const PLATEAU_RADIUS = 40;  // flat summit area
+const SLOPE_WIDTH = 390;     // how far the slopes stretch before meeting the normal terrain
+const CRATER_RADIUS = 20;   // outer edge of the indent
+const CRATER_EDGE = 6;      // how wide the sloped crater wall is
+const CRATER_DEPTH = 10;    // how far the floor sits below the summit
+
+// 0 below a, 1 above b, smooth in between
+const smooth = (a, b, x) => {
+  const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
 export function heightAt(x, z) {
-  // Big broad hills + smaller bumps at half strength, remapped to roughly 0-1
   const n = (perlin(x * 0.01, z * 0.01) + 0.5 * perlin(x * 0.03, z * 0.03)) * 0.5 + 0.5;
+  const dist = Math.hypot(x, z); // distance from the center
 
-  // 1 at the center, fading smoothly to 0 at FIELD_RADIUS (and staying 0 beyond it)
-  const d = Math.min(1, Math.hypot(x, z) / FIELD_RADIUS);
+  const d = Math.min(1, dist / FIELD_RADIUS);
   const centerBoost = 1 - d * d * (3 - 2 * d);
+  const peak = Math.pow(Math.max(0, 1 - dist / PEAK_RADIUS), 2);
 
-  return n * centerBoost * MAX_HEIGHT; // tall in the middle, flat (0) at the edges
+  let height = n * centerBoost * MAX_HEIGHT + peak * PEAK_HEIGHT; // the terrain as before
+
+  // 1. Flat summit: blend to exactly PLATEAU_HEIGHT near the center
+  const summit = 1 - smooth(PLATEAU_RADIUS, PLATEAU_RADIUS + SLOPE_WIDTH, dist);
+  height = height + (PLATEAU_HEIGHT - height) * summit;
+
+  // 2. Crater: blend to a flat floor below the summit
+  const crater = 1 - smooth(CRATER_RADIUS - CRATER_EDGE, CRATER_RADIUS, dist);
+  height = height + (PLATEAU_HEIGHT - CRATER_DEPTH - height) * crater;
+
+  return height;
 }
 
 // --- Hill mesh ---
-export function createHills(size = 3000, segments = 900) {
+export function createHills(size = 10000, segments = 1000) {
   const geo = new THREE.PlaneGeometry(size, size, segments, segments);
   geo.rotateX(-Math.PI / 2); // lay it flat so y is up
 

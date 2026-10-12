@@ -3,8 +3,10 @@ import { heightAt } from './world.js';
 
 const MOVE_SPEED = 50;       // units per second
 const MOUSE_SENSITIVITY = 0.002;
-const CAMERA_HEIGHT = 10;    // how far above the player the camera sits
-const CAMERA_BEHIND = 15;    // how far behind the player the camera sits ("x")
+const CAMERA_HEIGHT = 9;    // how far above the player the camera sits (on flat ground)
+const CAMERA_BEHIND = 20;    // how far behind the player the camera sits ("x")
+const CAMERA_SLOPE_EFFECT = 6; // how much the camera height changes on steep slopes
+const CAMERA_SMOOTHING = 4;    // higher = camera reacts faster to slope changes
 
 // Input: which keys are currently held down
 const keys = {};
@@ -23,11 +25,13 @@ export function createPlayer(scene, camera, domElement = document.body) {
     new THREE.MeshBasicMaterial({ color: 0x00ff00 })
   );
   player.position.set(0, 0, 380); // start in the flat field, facing the mountains
+  player.position.y = heightAt(player.position.x, player.position.z) + 1; // start on the ground
   scene.add(player);
 
   // Camera is a child of the player: it sits above and behind (+Z is behind),
   // and tilts down by exactly the angle needed to look at the player.
   player.add(camera);
+  player.userData.camera = camera; // remember it so updatePlayer can move it
   camera.position.set(0, CAMERA_HEIGHT, CAMERA_BEHIND);
   camera.rotation.x = -Math.atan2(CAMERA_HEIGHT, CAMERA_BEHIND);
 
@@ -49,6 +53,7 @@ const forward = new THREE.Vector3();
 const right = new THREE.Vector3();
 const move = new THREE.Vector3();
 const up = new THREE.Vector3(0, 1, 0);
+let smoothedSlope = 0; // the slope the camera is currently reacting to
 
 export function updatePlayer(player, dt) {
   // Direction the player is facing, and the direction to their right
@@ -63,11 +68,28 @@ export function updatePlayer(player, dt) {
   if (keys['ArrowLeft'])  move.sub(right);
 
   // Normalize so diagonals aren't faster, then move
+  const oldY = player.position.y;   // remember the height before moving
+  let distance = 0;                 // how far we moved this frame
   if (move.lengthSq() > 0) {
     move.normalize();
-    player.position.addScaledVector(move, MOVE_SPEED * dt);
+    distance = MOVE_SPEED * dt;
+    player.position.addScaledVector(move, distance);
   }
 
   // Stick to the terrain (+1 because the box is 2 tall and centered)
   player.position.y = heightAt(player.position.x, player.position.z) + 1;
+
+  // Slope of the ground we just walked over: positive = uphill, negative = downhill
+  const slope = distance > 0
+    ? THREE.MathUtils.clamp((player.position.y - oldY) / distance, -1, 1)
+    : 0; // standing still: ease back to normal
+
+  // Ease toward the new slope so the camera glides instead of snapping
+  smoothedSlope += (slope - smoothedSlope) * Math.min(1, CAMERA_SMOOTHING * dt);
+
+  // Going downhill (negative slope) raises the camera, going uphill lowers it
+  const camHeight = CAMERA_HEIGHT - smoothedSlope * CAMERA_SLOPE_EFFECT;
+  const camera = player.userData.camera;
+  camera.position.y = camHeight;
+  camera.rotation.x = -Math.atan2(camHeight, CAMERA_BEHIND); // keep looking at the player
 }
