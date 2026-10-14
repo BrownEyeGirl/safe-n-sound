@@ -111,6 +111,25 @@ const c = t < 0.5
   return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true }));
 }
 
+export function createMap() {
+    // 1. Create the geometry (width, height, widthSegments, heightSegments)
+    const geometry = new THREE.PlaneGeometry(1000, 1000);
+
+    // 2. Create a material (DoubleSide allows it to be seen from the back)
+    const material = new THREE.MeshBasicMaterial({ 
+    color: 0x00ff00, 
+    side: THREE.DoubleSide 
+    });
+
+    // 3. Combine into a mesh
+    const planeMesh = new THREE.Mesh(geometry, material);
+
+    // 4. By default, planes are vertical (facing the Z-axis). 
+    // To make it a horizontal floor, rotate it 90 degrees around the X-axis:
+    planeMesh.rotation.x = -Math.PI / 2;
+    planeMesh.position.y=40
+}
+
 // Usage:
 //   scene.add(createHills());
 //   tree.position.set(x, heightAt(x, z), z);

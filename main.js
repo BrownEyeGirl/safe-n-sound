@@ -7,7 +7,7 @@ import { EffectComposer } from 'https://unpkg.com/three/examples/jsm/postprocess
 import { RenderPass } from 'https://unpkg.com/three/examples/jsm/postprocessing/RenderPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'; // for sky
 
-import { createHills } from './world.js';
+import { createHills, createMap } from './world.js';
 import { createPlayer, updatePlayer } from './player.js';
 
 
@@ -16,8 +16,8 @@ let scene, camera, renderer, controls;
 
   // Scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xFF00D0)
-//  scene.fog = new THREE.Fog(0xFF00D0, 80, 400); // new fog, darker, shorter range
+  scene.background = new THREE.Color(0xFFffff)
+  scene.fog = new THREE.Fog(0xFFffff, 80, 400); // new fog, darker, shorter range
 
 
 // to see, ambient light 
@@ -42,6 +42,7 @@ planeMesh.y=0
 scene.add(planeMesh);
 
  scene.add(createHills());
+ scene.add(createMap()); 
 
 
 // Initialize the PerspectiveCamera
@@ -76,12 +77,12 @@ const clock = new THREE.Clock();
     composer.addPass(bokeh); */
     
 
-  const skyLoader = new THREE.TextureLoader();
+  /*const skyLoader = new THREE.TextureLoader();
 
   // load background 
   skyLoader.load('sky.jpeg', function (texture) {
       scene.background = texture;
-  });
+  });*/
 
 
 const loader = new GLTFLoader();
