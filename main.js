@@ -7,14 +7,14 @@ import { EffectComposer } from 'https://unpkg.com/three/examples/jsm/postprocess
 import { RenderPass } from 'https://unpkg.com/three/examples/jsm/postprocessing/RenderPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'; // for sky
 
+import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
 import { createHills, createMap } from './world.js';
 import { createPlayer, updatePlayer } from './player.js';
 
 
 let scene, camera, renderer, controls;
 
-
-  // Scene
+  // scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xFFffff)
   scene.fog = new THREE.Fog(0xFFffff, 80, 400); // new fog, darker, shorter range
@@ -41,8 +41,8 @@ planeMesh.rotation.x = Math.PI / 2;  // Rotate 90 degrees around the X-axis (mak
 planeMesh.y=0
 scene.add(planeMesh);
 
- scene.add(createHills());
- scene.add(createMap()); 
+scene.add(createHills());
+//scene.add(createMap()); 
 
 
 // Initialize the PerspectiveCamera
@@ -77,16 +77,18 @@ const clock = new THREE.Clock();
     composer.addPass(bokeh); */
     
 
-  /*const skyLoader = new THREE.TextureLoader();
+  const skyLoader = new THREE.TextureLoader();
 
   // load background 
   skyLoader.load('sky.jpeg', function (texture) {
       scene.background = texture;
-  });*/
+  });
 
 
 const loader = new GLTFLoader();
 let dumpster = loadGLTF("dumpster_reduced_size.glb"); 
+let flowers = []; // list of flowers to be generated
+generatePlants("media/tree_lowpoly/scene.gltf"); // generate trees
 
 
 animate()
@@ -132,43 +134,43 @@ function loadGLTF(path) {
 function generatePlants(model) { // make list flowers = [] in main
   const noise2D = createNoise2D(); // generate the perlin noise
 
-const loader = new GLTFLoader(); // loader for all of the gltf files 
+  const loader = new GLTFLoader(); // loader for all of the gltf files 
 
-loader.load(model, function(gltf) {
+  loader.load(model, function(gltf) {
 
-const baseFlower = gltf.scene;
-baseFlower.scale.set(20, 20, 20);
+  const baseFlower = gltf.scene;
+  baseFlower.scale.set(20, 20, 20);
 
-const size = 200;
-const half = size / 2;
+  const radius = 2000;
+  const half = radius / 2;
 
-// increase this for density
-const count = 2000;
+  // increase this for density
+  const count = 2000;
 
-for (let i = 0; i < count; i++) {
+  for (let i = 0; i < count; i++) {
 
-  // square distribution
-  const x = (Math.random() - 0.5) * size;
-  const z = (Math.random() - 0.5) * size;
+    // square distribution
+    const x = (Math.random() - 0.5) * radius;
+    const y = (Math.random() - 0.5) * radius;
 
-  // noise filter (controls clustering)
-  const n = noise2D(x * 0.03, z * 0.03);
+    // noise filter (controls clustering)
+    const n = noise2D(x * 0.03, y * 0.03);
 
-  if (n > 0.1) { // lower threshold = more flowers, dont generate if on the car
-    const flower = baseFlower.clone(true); // 
+    if (n > 0.1) { // lower threshold = more flowers, dont generate if on the car
+      const flower = baseFlower.clone(true); // 
 
-    flower.position.set(x, -10, z);
+      flower.position.set(x, heightAt(x,y), y);
 
-    // variation (makes it look natural)
-    const s = 15 + Math.random() * 10;
-    flower.scale.set(s, s, s);
+      // variation (makes it look natural)
+      const s = 15 + Math.random() * 10;
+      flower.scale.set(s, s, s);
 
-    flower.rotation.y = Math.random() * Math.PI * 2;
+      flower.rotation.y = Math.random() * Math.PI * 2;
 
-    scene.add(flower);
-    flowers.push(flower);
+      scene.add(flower);
+      flowers.push(flower);
+    }
   }
-}
-}); 
+  }); 
 
 }

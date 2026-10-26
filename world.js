@@ -71,7 +71,7 @@ export function heightAt(x, z) {
   return height;
 }
 
-// --- Hill mesh ---
+// Hill mesh
 export function createHills(size = 10000, segments = 1000) {
   const geo = new THREE.PlaneGeometry(size, size, segments, segments);
   geo.rotateX(-Math.PI / 2); // lay it flat so y is up
@@ -95,7 +95,7 @@ const c = t < 0.5
   const x = pos.getX(i), z = pos.getZ(i);
     pos.setY(i, h);
 
-    // ...your existing t and color blend code that makes `c`...
+    // ...existing t and color blend code that makes `c`...
 
     const grain = 1 + perlin(x * 0.15, z * 0.15) * 0.2; // about 0.8 to 1.2
     c.multiplyScalar(grain);                            // lighten or darken this vertex
@@ -130,6 +130,3 @@ export function createMap() {
     planeMesh.position.y=40
 }
 
-// Usage:
-//   scene.add(createHills());
-//   tree.position.set(x, heightAt(x, z), z);

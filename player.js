@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { heightAt } from './world.js';
+import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
 
 const MOVE_SPEED = 50;       // units per second
 const MOUSE_SENSITIVITY = 0.002;
@@ -76,15 +76,15 @@ export function updatePlayer(player, dt) {
     player.position.addScaledVector(move, distance);
   }
 
-  // Stick to the terrain (+1 because the box is 2 tall and centered)
+  // stick to the terrain (+1 because the box is 2 tall and centered)
   player.position.y = heightAt(player.position.x, player.position.z) + 1;
 
-  // Slope of the ground we just walked over: positive = uphill, negative = downhill
+  // slope of the ground we just walked over: positive = uphill, negative = downhill
   const slope = distance > 0
-    ? THREE.MathUtils.clamp((player.position.y - oldY) / distance, -1, 1)
+    ? THREE.MathUtils.clamp((player.position.y - oldY) / distance, -1, 1) // https://threejs.org/docs/#MathUtils.clamp
     : 0; // standing still: ease back to normal
 
-  // Ease toward the new slope so the camera glides instead of snapping
+  // ease toward the new slope so the camera glides instead of snapping
   smoothedSlope += (slope - smoothedSlope) * Math.min(1, CAMERA_SMOOTHING * dt);
 
   // Going downhill (negative slope) raises the camera, going uphill lowers it

@@ -1,0 +1,390 @@
+{
+  "accessors": [
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 1183,
+      "max": [
+        282.3229064941406,
+        899.4274291992188,
+        260.7614440917969
+      ],
+      "min": [
+        -282.32293701171875,
+        0.0,
+        -260.7614440917969
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 14196,
+      "componentType": 5126,
+      "count": 1183,
+      "max": [
+        0.9997591972351074,
+        0.9968860745429993,
+        0.9994308948516846
+      ],
+      "min": [
+        -0.9994590282440186,
+        -0.9329534769058228,
+        -0.996279776096344
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 1183,
+      "max": [
+        0.99609375,
+        2.255859375
+      ],
+      "min": [
+        -0.001728057861328125,
+        -1.2744140625
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 9464,
+      "componentType": 5126,
+      "count": 1183,
+      "max": [
+        0.9252966046333313,
+        0.9915398359298706
+      ],
+      "min": [
+        0.008460119366645813,
+        0.00846010260283947
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 2448,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 28392,
+      "componentType": 5126,
+      "count": 864,
+      "max": [
+        249.55169677734375,
+        848.0482788085938,
+        234.1094512939453
+      ],
+      "min": [
+        -249.55169677734375,
+        0.0,
+        -234.1094512939453
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "byteOffset": 38760,
+      "componentType": 5126,
+      "count": 864,
+      "max": [
+        0.9944380521774292,
+        0.9999993443489075,
+        0.9999181628227234
+      ],
+      "min": [
+        -0.9996825456619263,
+        -0.8145252466201782,
+        -0.9975419044494629
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 18928,
+      "componentType": 5126,
+      "count": 864,
+      "max": [
+        0.99609375,
+        1.650390625
+      ],
+      "min": [
+        -0.009552001953125,
+        -0.51025390625
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 25840,
+      "componentType": 5126,
+      "count": 864,
+      "max": [
+        0.933498740196228,
+        0.9514382481575012
+      ],
+      "min": [
+        0.005182571243494749,
+        0.005182591732591391
+      ],
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 0,
+      "byteOffset": 9792,
+      "componentType": 5125,
+      "count": 2439,
+      "type": "SCALAR"
+    }
+  ],
+  "asset": {
+    "extras": {
+      "author": "00amza (https://sketchfab.com/00amza)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/tree-low-poly-lowpoly-73201f05280d48dcb10ed4ca362d69f8",
+      "title": "Tree low poly lowpoly"
+    },
+    "generator": "Sketchfab-0.13.0",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 19548,
+      "name": "floatBufferViews",
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 32752,
+      "byteOffset": 19548,
+      "byteStride": 8,
+      "name": "floatBufferViews",
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 49128,
+      "byteOffset": 52300,
+      "byteStride": 12,
+      "name": "floatBufferViews",
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 101428,
+      "uri": "scene.bin"
+    }
+  ],
+  "extensionsUsed": [
+    "KHR_materials_specular"
+  ],
+  "images": [
+    {
+      "uri": "textures/Tree_1_baseColor.png"
+    }
+  ],
+  "materials": [
+    {
+      "alphaMode": "BLEND",
+      "doubleSided": true,
+      "extensions": {
+        "KHR_materials_specular": {
+          "specularColorFactor": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "specularFactor": 0.0
+        }
+      },
+      "name": "Tree_1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          1.0,
+          1.0,
+          1.0,
+          0.8213126264824029
+        ],
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0.12096854438989657
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Tree 1_Tree 1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 1,
+            "POSITION": 0,
+            "TEXCOORD_0": 2,
+            "TEXCOORD_1": 3
+          },
+          "indices": 4,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    },
+    {
+      "name": "Tree 2_Tree 1_0",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 6,
+            "POSITION": 5,
+            "TEXCOORD_0": 7,
+            "TEXCOORD_1": 8
+          },
+          "indices": 9,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        2.220446049250313e-16,
+        -1.0,
+        0.0,
+        0.0,
+        1.0,
+        2.220446049250313e-16,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Sketchfab_model"
+    },
+    {
+      "children": [
+        2
+      ],
+      "matrix": [
+        0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.009999999776482582,
+        0.0,
+        0.0,
+        -0.009999999776482582,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "e929f1de83674d64b0e3eb859f6740d4.fbx"
+    },
+    {
+      "children": [
+        3,
+        5
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
+        4
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        -270.7119445800781,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Tree 1"
+    },
+    {
+      "mesh": 0,
+      "name": "Tree 1_Tree 1_0"
+    },
+    {
+      "children": [
+        6
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        270.7119445800781,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Tree 2"
+    },
+    {
+      "mesh": 1,
+      "name": "Tree 2_Tree 1_0"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Sketchfab_Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    }
+  ]
+}
