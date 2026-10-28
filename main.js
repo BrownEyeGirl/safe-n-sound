@@ -16,8 +16,8 @@ let scene, camera, renderer, controls;
 
   // scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xFFffff)
-  scene.fog = new THREE.Fog(0xFFffff, 80, 400); // new fog, darker, shorter range
+  scene.background = new THREE.Color(0x000000)
+  scene.fog = new THREE.Fog(0x000000, 80, 400); // new fog, darker, shorter range
 
 
 // to see, ambient light 
@@ -80,9 +80,9 @@ const clock = new THREE.Clock();
   const skyLoader = new THREE.TextureLoader();
 
   // load background 
-  skyLoader.load('sky.jpeg', function (texture) {
+  /*skyLoader.load('sky.jpeg', function (texture) {
       scene.background = texture;
-  });
+  });*/
 
 
 const loader = new GLTFLoader();
