@@ -88,7 +88,7 @@ const clock = new THREE.Clock();
 const loader = new GLTFLoader();
 let dumpster = loadGLTF("dumpster_reduced_size.glb"); 
 let flowers = []; // list of flowers to be generated
-generatePlants("media/tree_lowpoly/scene.gltf"); // generate trees
+generatePlants("media/pine_tree_low-poly/scene.gltf"); // generate trees
 
 
 animate()
@@ -136,16 +136,21 @@ function generatePlants(model) { // make list flowers = [] in main
 
   const loader = new GLTFLoader(); // loader for all of the gltf files 
 
+  const parentGroup = new THREE.Group();
+  scene.add(parentGroup);
+
   loader.load(model, function(gltf) {
 
   const baseFlower = gltf.scene;
-  baseFlower.scale.set(20, 20, 20);
+  parentGroup.add(baseFlower);
+    //baseFlower.scale.set(10,10,10); // scale the flower model
+    parentGroup.scale.set(1,1,1); 
 
   const radius = 2000;
   const half = radius / 2;
 
   // increase this for density
-  const count = 2000;
+  const count = 200;
 
   for (let i = 0; i < count; i++) {
 
@@ -162,8 +167,8 @@ function generatePlants(model) { // make list flowers = [] in main
       flower.position.set(x, heightAt(x,y), y);
 
       // variation (makes it look natural)
-      const s = 15 + Math.random() * 10;
-      flower.scale.set(s, s, s);
+      //const s = 15 + Math.random() * 10;
+      //flower.scale.set(s, s, s);
 
       flower.rotation.y = Math.random() * Math.PI * 2;
 
