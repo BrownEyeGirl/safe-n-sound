@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const SEED = 69; // change this number for a new landscape (same number = same hills)
+const SEED = 69; // seed for snowdrifts
 
 // --- Perlin noise (2D) ---
 
@@ -31,7 +31,7 @@ function perlin(x, y) {
 
 // --- Height at any world position ---
 const MAX_HEIGHT = 50;   // height of the tallest mountains
-const FIELD_RADIUS = 1500; // distance from the center where the ground becomes totally flat
+const FIELD_RADIUS = 9000; // distance from the center where the ground becomes totally flat
 
 const PEAK_HEIGHT = 120; // how tall the central peak is, on top of the other mountains
 const PEAK_RADIUS = 120; // how wide its base is
@@ -89,11 +89,11 @@ export function createHills(size = 10000, segments = 1000) {
      const t = THREE.MathUtils.clamp(h / (MAX_HEIGHT * 0.6), 0, 1); // 0 = low, 1 = high
 
 // First half of the height range blends low to mid, second half blends mid to high
-const c = t < 0.5
+ const c = t < 0.5
   ? low.clone().lerp(mid, t * 2)
   : mid.clone().lerp(high, (t - 0.5) * 2);          // blend the three colors
   const x = pos.getX(i), z = pos.getZ(i);
-    pos.setY(i, h);
+    pos.setY(i, h); 
 
     // ...existing t and color blend code that makes `c`...
 
@@ -101,7 +101,7 @@ const c = t < 0.5
     c.multiplyScalar(grain);                            // lighten or darken this vertex
   
     colors.push(c.r, c.g, c.b);
-  }
+  } 
 
  
 

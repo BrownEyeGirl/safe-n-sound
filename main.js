@@ -12,19 +12,19 @@ import { createHills, createMap } from './world.js';
 import { createPlayer, updatePlayer } from './player.js';
 
 
-let scene, camera, renderer, controls;
+let scene, renderer, controls, camera, player;
+const clock = new THREE.Clock();
 
   // scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000)
-  scene.fog = new THREE.Fog(0x000000, 80, 400); // new fog, darker, shorter range
+  //scene.fog = new THREE.Fog(0x000000, 80, 400); // new fog, darker, shorter range
 
 
 // to see, ambient light 
 const light = new THREE.AmbientLight( 0xffffff, 1 ); // soft white light
-light.distance = 500; 
+light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
-
 
 // Create a plane geometry: width = 10, height = 10
 const geometry = new THREE.PlaneGeometry(10, 10);
@@ -42,14 +42,7 @@ planeMesh.y=0
 scene.add(planeMesh);
 
 scene.add(createHills());
-//scene.add(createMap()); 
-
-
-// Initialize the PerspectiveCamera
- camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const player = createPlayer(scene, camera);
-const clock = new THREE.Clock();
-
+scene.add(createMap()); 
 
   /* Renderer */
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -58,6 +51,30 @@ const clock = new THREE.Clock();
   renderer.shadowMap.enabled = true;
   document.body.appendChild(renderer.domElement);
 
+  let birdsEyeView = false; // toggle for birds eye view camera
+  let flowers = []; // list of flowers to be generated
+
+  /* Birds eye view camera for map */
+  if(birdsEyeView) {
+    // 0. Add ambient light to the scene
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    // 1. Create a PerspectiveCamera or OrthographicCamera
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    camera = new THREE.PerspectiveCamera(150, width / height, 1, 20000); // camera to make map 
+    // 2. Position high up on the Y-axis looking straight down
+    camera.position.set(0, 1000, 0); // X, Y (height), Z
+
+    // 3. Point the camera at the center of the scene (or use lookAt)
+    camera.lookAt(0, 0, 0);
+  }
+
+  if(!birdsEyeView) {
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    player = createPlayer(scene, camera);
+    generatePlants("media/pine_tree_low-poly/scene.gltf"); // generate trees
+  }
 
   //  Controls 
   /*controls = new OrbitControls(camera, renderer.domElement);
@@ -86,15 +103,14 @@ const clock = new THREE.Clock();
 
 
 const loader = new GLTFLoader();
-let dumpster = loadGLTF("dumpster_reduced_size.glb"); 
-let flowers = []; // list of flowers to be generated
-generatePlants("media/pine_tree_low-poly/scene.gltf"); // generate trees
+//let dumpster = loadGLTF("dumpster_reduced_size.glb"); 
+
 
 
 animate()
 function animate() {
 
-  updatePlayer(player, clock.getDelta()); // move the camera based on held keys
+  if(!birdsEyeView) {updatePlayer(player, clock.getDelta());} // move the camera based on held keys
 
   requestAnimationFrame(animate);
 
