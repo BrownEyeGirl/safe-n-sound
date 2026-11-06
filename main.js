@@ -22,12 +22,18 @@ import { heightAt } from './world.js'; // imports the hightAt function, gets Z a
 import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
 import { createPlayer, updatePlayer } from './characters/player.js';
 import { renderParticles } from './boids.js';
-import { createCyborg, updateCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
-import { Can, checkCanCollection, cans } from './items/cans.js'; 
+import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
+import { attachCamera, moveMesh } from './cameraControls.js';
 
+import { Can, checkCanCollection, cans } from './items/cans.js'; 
 let scene, renderer, controls, camera, player, cyborg,loc;
 let flock; // global variable for the flock of birds
 const clock = new THREE.Clock();
+
+// move cyborg and player mesh 
+let rig; // current camera rig, can be attached/detached when switchign meshes 
+let cyborgGroundOffset = 0;
+const playerWorld = new THREE.Vector3();
 
 
 /* Items */ 
@@ -130,7 +136,8 @@ loadArchitecture(); // load the base and other architecture
     camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 10000);
     
     cyborg = createCyborg(scene, camera); 
-    player = createPlayer(scene, camera);
+    player = createPlayer(scene);
+    rig = attachCamera(camera, player);  
 
     /* Player Position Display */
     loc = document.createElement('div');
@@ -219,6 +226,18 @@ function animate() {
     z: ${player.position.z.toFixed(1)} \n
     y: ${player.position.y.toFixed(1)}`; // players location rounded to nearest int
     //sky.position.copy(player.position);
+
+
+    // attemtp to move player and cyborg 
+    player.getWorldPosition(playerWorld);
+
+    const dt = clock.getDelta(); // only call once per frame
+    if (mounted) {
+      moveMesh(cyborg, dt, CYBORG_SPEED);
+      cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z) + cyborgGroundOffset;
+    } else {
+      updatePlayer(player, dt);
+}
 
     updatePlayer(player,  clock.getDelta());
     /*if (mounted) {
@@ -326,6 +345,8 @@ function loadBuilding(building) {
 
 // check if mounted 
 let mount_rad = 700
+const CYBORG_SPEED = 50; // attempt to move cyborhg
+
 window.addEventListener('keydown', (e) => {
   if (e.code !== 'Space' || e.repeat) return;  // e.repeat stops hold-key retriggering
 
@@ -338,19 +359,24 @@ window.addEventListener('keydown', (e) => {
 });
 
 function mount() {
-  player.attach(cyborg);    // reparent: player is parent of cyborg
-  cyborg.position.x = player.position.x
-  cyborg.position.z = player.position.z
-
-  console.log("position" + player.position.x + "cyboeg:" + cyborg.position.y)
-  //player.position.set(cyborgWidth/3, 300, 0);
-  //cyborg.rotation.set(0, 0, 0); // face the same way as the cyborg
+  rig.detach();                          // camera + controls off the player
+  cyborg.rotation.y = player.rotation.y; // so the view doesn't jump
+  cyborg.add(player);                    // player rides as a child of the cyborg
+  player.position.set(cyborgWidth/3, cyborgHeight, 0);
+  player.rotation.copy(cyborg.rotation)
+  cyborgGroundOffset = cyborg.position.y - heightAt(cyborg.position.x, cyborg.position.z);
+  rig = attachCamera(camera, cyborg, document.body, {
+    pivotHeight: cyborgHeight,
+    radius: cyborgHeight * 1.5,
+  });
   mounted = true;
 }
 
 function dismount() {
-  scene.attach(player);  // attach() keeps the player's current world position
-  player.position.x += 10;  // step off to the side so they don't overlap
+  rig.detach();
+  scene.attach(player); // keeps the player's world position
+  player.position.x += 10;
   player.position.y = heightAt(player.position.x, player.position.z);
+  rig = attachCamera(camera, player);
   mounted = false;
 }

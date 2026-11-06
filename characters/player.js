@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { heightAt } from '../world.js'; // imports the hightAt function, gets Z at specific x,y
+import { moveMesh } from '../cameraControls.js'
+
 
 const MOVE_SPEED = 50;       // units per second
 const MOUSE_SENSITIVITY = 0.002;
@@ -18,6 +20,25 @@ window.addEventListener('keyup', (e) => {
   keys[e.code] = false;
 });
 
+
+export function createPlayer(scene) {
+  const player = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 1),
+    new THREE.MeshBasicMaterial({ color: 0xffffff })
+  );
+  player.position.set(0, 0, 200);
+  player.position.y = heightAt(player.position.x, player.position.z) + 1;
+  scene.add(player);
+  return player;
+}
+
+export function updatePlayer(player, dt) {
+  moveMesh(player, dt, MOVE_SPEED);
+  player.position.y = heightAt(player.position.x, player.position.z) + 5;
+}
+
+
+/*
 // Create the player and attach the camera to it 
 export function createPlayer(scene, camera, domElement = document.body) {
   const player = new THREE.Mesh(
@@ -83,7 +104,7 @@ export function updatePlayer(player, dt) {
     player.position.y = heightAt(player.position.x, player.position.z) + 5;
 
 }
-
+*/
 
 
 
