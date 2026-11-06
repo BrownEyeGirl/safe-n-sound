@@ -1,0 +1,356 @@
+import * as THREE from "https://unpkg.com/three@0.182.0/build/three.module.js";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Water } from 'https://unpkg.com/three@0.182.0/examples/jsm/objects/Water.js';
+import { BokehPass } from "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/BokehPass.js";
+import { EffectComposer } from 'https://unpkg.com/three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://unpkg.com/three/examples/jsm/postprocessing/RenderPass.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'; // for sky
+
+//postprocessing
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { RGBShiftShader } from 'three/addons/shaders/RGBShiftShader.js';
+import { DotScreenShader } from 'three/addons/shaders/DotScreenShader.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
+import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
+
+
+
+
+import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
+import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
+import { createPlayer, updatePlayer } from './characters/player.js';
+import { renderParticles } from './boids.js';
+import { createCyborg, updateCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
+import { Can, checkCanCollection, cans } from './items/cans.js'; 
+
+let scene, renderer, controls, camera, player, cyborg,loc;
+let flock; // global variable for the flock of birds
+const clock = new THREE.Clock();
+
+
+/* Items */ 
+let trees = {
+  scale: 1,
+  seed: 69,
+  count: 50,
+  model: "media/pine_tree_low-poly/scene.gltf",
+}
+
+let dead_trees = {
+  scale: 1.3,
+  seed: 35,
+  count: 10,
+  model: "media/dead_tree/scene.gltf",
+}
+
+let bando1 = {
+  x: -2000,
+  y: 0,
+  z: 500,
+  model: "media/abandoned_building_lowpoly/scene.gltf",
+  scale: 90,
+}
+
+let base = { 
+  x: 0,
+  y: -5,
+  z: 0,
+  model: "media/wooden_structure.glb",
+  scale: 90,
+}
+
+let parking_garage = { 
+  x: -800,
+  y: 100,
+  z: -800,
+  model: "media/parking_garage.glb",
+  scale: 60,
+}
+
+let dumpster = {
+  x: -980,
+  y: 0,
+  z: 830,
+  model: "media/dumpster_clean.glb",
+  scale: 250,
+}
+
+
+let the_fog = false; 
+let birdsEyeView = false; // toggle for birds eye view camera
+
+
+let lavender = 0xE4E0FF
+
+
+  // scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff)
+  //scene.fog = new THREE.Fog(0xffffff, 0, 1000); // new fog, darker, shorter range
+
+
+// to see, ambient light 
+const light = new THREE.AmbientLight( 0xffffff, 1 ); // soft white light
+light.distance = 10000; // size of perlin noise snowdrift map 
+scene.add( light );
+
+
+scene.add(createMap()); 
+let hills = createHills(); 
+scene.add(hills);
+loadAnimals(); // load the boids (birds) into the scene
+loadPlants(); // load the trees into the scene
+loadComponents(); 
+console.log(cans)
+loadArchitecture(); // load the base and other architecture
+
+  /* Renderer */
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.toneMapping = THREE.NoToneMapping; // try to make corners invisible
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+
+  /* Birds eye view camera for map */
+  if(birdsEyeView) {
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);   // 0. Add ambient light to the scene
+    scene.add(ambientLight);
+    const width = window.innerWidth;  // 1. Create a PerspectiveCamera or OrthographicCamera
+    const height = window.innerHeight; 
+    camera = new THREE.PerspectiveCamera(150, width / height, 1, 20000); // camera to make map 
+    
+    camera.position.set(0, 1000, 0); // X, Y (height), Z. 2. Position high up on the Y-axis looking straight down. 
+    camera.lookAt(0, 0, 0);  // 3. Point the camera at the center of the scene (or use lookAt)
+  }
+
+  if(!birdsEyeView) {
+    camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 10000);
+    
+    cyborg = createCyborg(scene, camera); 
+    player = createPlayer(scene, camera);
+
+    /* Player Position Display */
+    loc = document.createElement('div');
+    loc.id = "info"; 
+    document.body.appendChild(loc);
+  }
+
+
+  // EFFECT COMPOSER 
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  
+    const bokeh = new BokehPass(scene, camera, {
+      focus: 50.0,        // distance where image is sharp
+      aperture: 0.0001,  // blur strength (smaller = subtle blur)
+      maxblur: 0.01      // max blur allowed
+    });
+   //composer.addPass(bokeh); 
+    
+    // postprocessing
+    //composer = new EffectComposer( renderer );
+    //composer.addPass( new RenderPass( scene, camera ) );
+
+    //const effect1 = new ShaderPass( DotScreenShader );
+   // effect1.uniforms[ 'scale' ].value = 10;
+   // composer.addPass( effect1 );
+
+  //  const effect2 = new ShaderPass( RGBShiftShader );
+   // effect2.uniforms[ 'amount' ].value = 0.0015;
+   // composer.addPass( effect2 );
+
+    //const filmPass = new FilmPass();
+   //composer.addPass( filmPass );
+
+   const params = {
+      shape: 0.2,
+      radius: 0.7,
+      rotateR: Math.PI / 12,
+      rotateB: Math.PI / 12,
+      rotateG: Math.PI /10,
+      scatter: 0.5,
+      blending: 0.8,
+      blendingMode: 1,
+      greyscale: true,
+      disable: false
+    };
+  const halftonePass = new HalftonePass( params );
+  //composer.addPass( halftonePass );
+
+  const dotScreen = new ShaderPass( DotScreenShader );
+dotScreen.uniforms[ 'scale' ].value = 4;
+//composer.addPass( dotScreen );
+
+const rgbShift = new ShaderPass( RGBShiftShader );
+rgbShift.uniforms[ 'amount' ].value = 0.0015;
+//composer.addPass( rgbShift );
+
+//composer.addPass( new OutputPass() );
+
+
+//const skyLoader = new THREE.TextureLoader();
+
+  // load background 
+  /*skyLoader.load('media/sky/sky.jpeg', function (texture) {
+      scene.background = texture;
+  });*/
+const skyLoader = new RGBELoader();
+
+/*skyLoader.load('media/sky/sky.hdr', function (texture) {
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = texture;
+  scene.environmentIntensity = 0; // Default is 1.0; increase to brighten or decrease to dim
+  scene.backgroundRotation.y = Math.PI / 2;
+});*/
+
+// cybogr 
+let mounted = false;
+
+animate()
+function animate() {
+
+  //if(!birdsEyeView) {updatePlayer(player, clock.getDelta());} // move the camera based on held keys (if not on birds eye view development mode)
+  if(!birdsEyeView) {
+    loc.textContent = 
+    `x: ${player.position.x.toFixed(1)} \n
+    z: ${player.position.z.toFixed(1)} \n
+    y: ${player.position.y.toFixed(1)}`; // players location rounded to nearest int
+    //sky.position.copy(player.position);
+
+    updatePlayer(player,  clock.getDelta());
+    /*if (mounted) {
+      updateCyborg(cyborg,  clock.getDelta());   // cyborg walks w player
+    } else {
+      updatePlayer(player,  clock.getDelta());
+    }*/
+    flock.update(); // birds
+  }
+
+  checkCanCollection(player, cans); 
+  requestAnimationFrame(animate);
+
+composer.render(); 
+  // Conditional rendering switch
+    if (the_fog) {
+        composer.render();
+        scene.background = new THREE.Color(0x101518)
+        scene.fog = new THREE.Fog(0x000000, 0, 700); // new fog, darker, shorter range
+    } else {
+        //renderer.render(scene, camera);
+        scene.background = new THREE.Color(lavender)
+        scene.fog = new THREE.Fog(lavender, 0, 1000); // new fog, darker, shorter range
+    }
+}
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function loadArchitecture() {
+  //scene.add(createBase()); // create the home base at 0,0
+//  scene.add(loadBuilding(bando1)); 
+  scene.add(loadBuilding(base)); 
+  scene.add(loadBuilding(parking_garage));
+  scene.add(loadBuilding(dumpster))
+  scene.add(generateWalls()); // load walls around the base
+}
+
+function loadAnimals() {
+  // 100 white points, size 2, centered at (0, 50, 0) with radius 100
+ flock = renderParticles(100, 0x000000, 2, 0, heightAt(0,0)+200, 0, 500);
+scene.add(flock.points);
+}
+
+function loadPlants() {
+  scene.add(generatePlants(trees)); // generate trees
+  scene.add(generatePlants(dead_trees))
+}
+
+function loadComponents() {
+
+  const can1 = new Can(
+  scene,
+   new THREE.Vector3(100,
+   heightAt(0,0)+10,
+   100)
+);
+
+}
+
+function loadBuilding(building) {
+  const group = new THREE.Group(); // makes it a 3d object somehow 
+  const loader = new GLTFLoader();
+  let modelHeight = 0; 
+
+  loader.load(building.model, (gltf) => {
+    const b = gltf.scene;
+    b.scale.set(building.scale, building.scale, building.scale);
+
+    // attemtp to create boundign box
+  /// 1. Create an empty Box3 bounding box
+    const box = new THREE.Box3();
+
+    // 2. Compute the bounding box of the glTF scene
+    box.setFromObject(b);
+    const boxH = new THREE.BoxHelper( b, 0xffff00 );
+
+
+    // 3. Extract the size dimensions into a Vector3 target
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    // 4. Access the height via the 'y' property
+     modelHeight = size.y;
+
+    console.log(modelHeight)
+
+    group.add(boxH);
+    group.add(b); // appears in the scene once loaded
+  });
+
+
+    const x = building.x;
+    const z = building.z;
+    group.position.set(x, heightAt(x, z)+modelHeight, z);
+  
+
+
+
+  return group;
+}
+
+// check if mounted 
+let mount_rad = 700
+window.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space' || e.repeat) return;  // e.repeat stops hold-key retriggering
+
+  if (!mounted) {
+    if (player.position.distanceTo(cyborg.position) > mount_rad) return;
+    mount();
+  } else {
+    dismount();
+  }
+});
+
+function mount() {
+  player.attach(cyborg);    // reparent: player is parent of cyborg
+  cyborg.position.x = player.position.x
+  cyborg.position.z = player.position.z
+
+  console.log("position" + player.position.x + "cyboeg:" + cyborg.position.y)
+  //player.position.set(cyborgWidth/3, 300, 0);
+  //cyborg.rotation.set(0, 0, 0); // face the same way as the cyborg
+  mounted = true;
+}
+
+function dismount() {
+  scene.attach(player);  // attach() keeps the player's current world position
+  player.position.x += 10;  // step off to the side so they don't overlap
+  player.position.y = heightAt(player.position.x, player.position.z);
+  mounted = false;
+}
