@@ -57,11 +57,7 @@ export function checkCanCollection(player, cans) {
 
         if (can.collected) continue;
 
-        const distance = player.position.distanceTo(
-            can.mesh.position
-        );
-
-        if (distance < 100) {
+        if (player.position.distanceTo(can.mesh.position) < 100) {
 
             // Show bounding box
             can.boundingBox.visible = true;
@@ -70,6 +66,18 @@ export function checkCanCollection(player, cans) {
 
             // can.collect();
         }
+
+    
+        /*if (cyborg.position.distanceTo(can.mesh.position) < 100) {
+
+            // Show bounding box
+            can.boundingBox.visible = true;
+
+            console.log("Can nearby!");
+
+            // can.collect();
+        }*/
+
 
         else {
             can.boundingBox.visible = false;

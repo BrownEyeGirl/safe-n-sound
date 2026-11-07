@@ -27,14 +27,14 @@ export function createPlayer(scene) {
     new THREE.MeshBasicMaterial({ color: 0xffffff })
   );
   player.position.set(0, 0, 200);
-  player.position.y = heightAt(player.position.x, player.position.z) + 1;
+  player.position.y = heightAt(player.position.x, player.position.z)+1;
   scene.add(player);
   return player;
 }
 
 export function updatePlayer(player, dt) {
   moveMesh(player, dt, MOVE_SPEED);
-  player.position.y = heightAt(player.position.x, player.position.z) + 5;
+  player.position.y = heightAt(player.position.x, player.position.z)+1;
 }
 
 

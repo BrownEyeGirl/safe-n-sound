@@ -37,8 +37,9 @@ export function updateCamera(camera, dt) {
 }
 
 
-export function attachCamera(camera, target, domElement = document.body, options = {}) {
-  const { pivotHeight = 5, radius = 10, startPitch = -0.5 } = options;
+export function attachCamera(mounted, camera, target, domElement = document.body, options = {}) {
+  let { pitchMin = 0.5, pivotHeight = 5, radius = 10, startPitch = -0.5 } = options;
+
 
   const pivot = new THREE.Object3D();
   pivot.position.set(0, pivotHeight, 0);
@@ -54,7 +55,7 @@ export function attachCamera(camera, target, domElement = document.body, options
     if (document.pointerLockElement === domElement) {
       target.rotation.y -= e.movementX * MOUSE_SENSITIVITY;
       pitch -= e.movementY * MOUSE_SENSITIVITY;
-      pitch = Math.max(-1.2, Math.min(0.13, pitch));
+      pitch = Math.max(-1.2, Math.min(pitchMin, pitch));
       pivot.rotation.x = pitch;
     }
   };
@@ -86,4 +87,10 @@ export function moveMesh(mesh, dt, speed = SPEED) {
     move.normalize();
     mesh.position.addScaledVector(move, speed * dt);
   }
+
+  return move; 
+}
+
+export function setPivotHeight(y) {
+
 }

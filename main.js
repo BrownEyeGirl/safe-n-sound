@@ -15,9 +15,7 @@ import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
 
-
-
-
+// imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
 import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
 import { createPlayer, updatePlayer } from './characters/player.js';
@@ -34,6 +32,7 @@ const clock = new THREE.Clock();
 let rig; // current camera rig, can be attached/detached when switchign meshes 
 let cyborgGroundOffset = 0;
 const playerWorld = new THREE.Vector3();
+let mounted = false;
 
 
 /* Items */ 
@@ -103,7 +102,7 @@ light.distance = 10000; // size of perlin noise snowdrift map
 scene.add( light );
 
 
-scene.add(createMap()); 
+createMap(scene); 
 let hills = createHills(); 
 scene.add(hills);
 loadAnimals(); // load the boids (birds) into the scene
@@ -137,7 +136,7 @@ loadArchitecture(); // load the base and other architecture
     
     cyborg = createCyborg(scene, camera); 
     player = createPlayer(scene);
-    rig = attachCamera(camera, player);  
+    rig = attachCamera(mounted,camera, player);  
 
     /* Player Position Display */
     loc = document.createElement('div');
@@ -213,8 +212,6 @@ const skyLoader = new RGBELoader();
   scene.backgroundRotation.y = Math.PI / 2;
 });*/
 
-// cybogr 
-let mounted = false;
 
 animate()
 function animate() {
@@ -237,14 +234,8 @@ function animate() {
       cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z) + cyborgGroundOffset;
     } else {
       updatePlayer(player, dt);
-}
-
-    updatePlayer(player,  clock.getDelta());
-    /*if (mounted) {
-      updateCyborg(cyborg,  clock.getDelta());   // cyborg walks w player
-    } else {
-      updatePlayer(player,  clock.getDelta());
-    }*/
+    }
+    updatePlayer(player, clock.getDelta());
     flock.update(); // birds
   }
 
@@ -345,7 +336,7 @@ function loadBuilding(building) {
 
 // check if mounted 
 let mount_rad = 700
-const CYBORG_SPEED = 50; // attempt to move cyborhg
+const CYBORG_SPEED = 100; // attempt to move cyborhg
 
 window.addEventListener('keydown', (e) => {
   if (e.code !== 'Space' || e.repeat) return;  // e.repeat stops hold-key retriggering
@@ -362,12 +353,12 @@ function mount() {
   rig.detach();                          // camera + controls off the player
   cyborg.rotation.y = player.rotation.y; // so the view doesn't jump
   cyborg.add(player);                    // player rides as a child of the cyborg
-  player.position.set(cyborgWidth/3, cyborgHeight, 0);
+  player.position.set(cyborgWidth/3, cyborgHeight+10, 0);
   player.rotation.copy(cyborg.rotation)
   cyborgGroundOffset = cyborg.position.y - heightAt(cyborg.position.x, cyborg.position.z);
-  rig = attachCamera(camera, cyborg, document.body, {
+  rig = attachCamera(mounted,camera, cyborg, document.body, {
     pivotHeight: cyborgHeight,
-    radius: cyborgHeight * 1.5,
+    //radius: cyborgHeight * 1.5,
   });
   mounted = true;
 }
@@ -377,6 +368,7 @@ function dismount() {
   scene.attach(player); // keeps the player's world position
   player.position.x += 10;
   player.position.y = heightAt(player.position.x, player.position.z);
-  rig = attachCamera(camera, player);
+  player.rotation.copy(cyborg.rotation)
+  rig = attachCamera(mounted,camera, player);
   mounted = false;
 }

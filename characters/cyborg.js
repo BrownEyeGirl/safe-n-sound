@@ -10,8 +10,8 @@ const CAMERA_BEHIND = 20;    // how far behind the cyborg the camera sits ("x")
 const CAMERA_SLOPE_EFFECT = 6; // how much the camera height changes on steep slopes
 const CAMERA_SMOOTHING = 4;    // higher = camera reacts faster to slope changes
 
-export let cyborgHeight = 120; 
-export let cyborgWidth = 80; 
+export let cyborgHeight = 140; 
+export let cyborgWidth = 100; 
 
 // Input: which keys are currently held down
 const keys = {};
@@ -26,35 +26,13 @@ window.addEventListener('keyup', (e) => {
 // Create the cyborg and attach the camera to it 
 export function createCyborg(scene, camera, domElement = document.body) {
   const cyborg = new THREE.Mesh(
-    new THREE.BoxGeometry(cyborgWidth, cyborgHeight, cyborgWidth),
+    new THREE.BoxGeometry(cyborgWidth, cyborgHeight, cyborgWidth-50),
     new THREE.MeshBasicMaterial({ color: 0x0000FF })
   );
   cyborg.position.set(0, 0, 0); 
-  cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z)// + cyborgHeight/2; // start on the ground
+  cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z) + cyborgHeight/2; // start on the ground
   scene.add(cyborg);  
 
-  /*
-  const pivot = new THREE.Object3D(); // pivot point for the camera to orbit around
-  pivot.position.set(0, 5, 0);   // the point the camera orbits, 3 above the cyborg
-  cyborg.add(pivot);
-  pivot.add(camera);
-  camera.position.set(0, 0, 10); // orbit radius
-  let pitch = -0.5;
-  pivot.rotation.x = pitch;
-  //camera.rotation.x = -Math.atan2(CAMERA_HEIGHT, CAMERA_BEHIND);
-
-  // Click the game to capture the mouse (press Esc to release it)
-  domElement.addEventListener('click', () => domElement.requestPointerLock());
-
-  // Mouse movement left/right turns the cyborg
-  document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement === domElement) {
-      cyborg.rotation.y -= e.movementX * MOUSE_SENSITIVITY;
-      pitch -= e.movementY * MOUSE_SENSITIVITY;
-      pitch = Math.max(-1.2, Math.min(0.13, pitch)); // 0.13 stops the camera before it reaches the cyborg's level
-      pivot.rotation.x = pitch;
-    }
-  });*/
   return cyborg;
 }
 

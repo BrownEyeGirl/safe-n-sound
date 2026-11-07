@@ -34,7 +34,7 @@ function perlin(x, y) {
 }
 
 /* Height at any world position */
-const MAX_HEIGHT = 25;   // height of the tallest mountains
+const MAX_HEIGHT = 50;   // height of the tallest mountains
 const FIELD_RADIUS = 6000; // distance from the center where the ground becomes totally flat
 
 const PEAK_HEIGHT = 200; // how tall the central peak is, on top of the other mountains
@@ -55,7 +55,7 @@ const smooth = (a, b, x) => {
 };
 
 export function heightAt(x, z) {
-  const n = (perlin(x * 0.01, z * 0.01) + 0.5 * perlin(x * 0.03, z * 0.03)) * 0.5 + 0.5;
+  const n = (perlin(x * 0.01, z * 0.02) + 0.05 * perlin(x * 0.01, z * 0.03)) * 0.5;
   const dist = Math.hypot(x, z); // distance from the center
 
   const d = Math.min(1, dist / FIELD_RADIUS);
@@ -82,7 +82,7 @@ function createPeaks(x,z) {
 
 
 /* Hills/Snowdrifts mesh */
-export function createHills(size = 5000, segments = 1000) {
+export function createHills(size = 5000, segments = 500) {
   const geo = new THREE.PlaneGeometry(size, size, segments, segments);
   geo.rotateX(-Math.PI / 2); // lay it flat so y is up
 
@@ -106,9 +106,8 @@ export function createHills(size = 5000, segments = 1000) {
     pos.setY(i, h); 
 
     // ...existing t and color blend code that makes `c`...
-
-   // const grain = 1 + perlin(x * 0.9, z * 0.1); 
-   // c.multiplyScalar(grain);                            // lighten or darken this vertex
+    const grain = 1 + perlin(x * 0.9, z * 0.1); 
+    c.multiplyScalar(grain);                            // lighten or darken this vertex
   
     colors.push(c.r, c.g, c.b);
   }
@@ -119,9 +118,9 @@ export function createHills(size = 5000, segments = 1000) {
   return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true})); // vertexColors: true }));
 }
 
-export function createMap() {
+export function createMap(scene) {
     // 1. Create the geometry (width, height, widthSegments, heightSegments)
-    const geometry = new THREE.PlaneGeometry(1000, 1000);
+    const geometry = new THREE.PlaneGeometry(5000, 5000);
 
     // 2. Create a material (DoubleSide allows it to be seen from the back)
     const material = new THREE.MeshBasicMaterial({ 
@@ -135,7 +134,8 @@ export function createMap() {
     // 4. By default, planes are vertical (facing the Z-axis). 
     // To make it a horizontal floor, rotate it 90 degrees around the X-axis:
     planeMesh.rotation.x = -Math.PI / 2;
-    planeMesh.position.y=40
+    planeMesh.position.y=0
+    scene.add(planeMesh)
 }
 
 export function createBase() {
