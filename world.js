@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { createNoise2D } from "https://cdn.skypack.dev/simplex-noise";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { hillColors } from './style/colors.js'
+import * as COLORS from './style/colors.js'
 
 
 const SEED = 69; // seed for snowdrifts
@@ -40,13 +40,6 @@ const FIELD_RADIUS = 6000; // distance from the center where the ground becomes 
 const PEAK_HEIGHT = 200; // how tall the central peak is, on top of the other mountains
 const PEAK_RADIUS = 200; // how wide its base is
 
-const FLAT_TOP = 150; // the peak's height; anything higher gets sliced flat
-const PLATEAU_HEIGHT = 150; // height of the flat summit
-const PLATEAU_RADIUS = 100;  // flat summit area
-const SLOPE_WIDTH = 500;     // how far the slopes stretch before meeting the normal terrain
-const CRATER_RADIUS = 60;   // outer edge of the indent
-const CRATER_EDGE = 10;      // how wide the sloped crater wall is
-const CRATER_DEPTH = -5;    // how far the floor sits below the summit
 
 // 0 below a, 1 above b, smooth in between
 const smooth = (a, b, x) => {
@@ -54,41 +47,58 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-export function heightAt(x, z) {
+// Large hills at specific points: [x, z, height, radius, flat top radius]
+const BIG_HILLS = [
+  [1200, -800, 150, 2050, 100],
+  [-1500, 400, 300, 950, 60],
+  [600, 1500, 380, 600, 150],
+];
+// Height added by the large hills at a point (same falloff shape as the central peak)
+function bigHillsAt(x, z) {
+  let sum = 0;
+  for (const [hx, hz, h, r, flat] of BIG_HILLS) {
+    const dist = Math.hypot(x - hx, z - hz); // distance from this hill's center
+    const t = Math.min(1, Math.max(0, dist - flat) / (r - flat)); // 0 on the flat top, 1 at the base edge
+    sum += Math.pow(1 - t, 2) * h;
+  }
+  return sum;
+}
+
+// Rolling hills: perlin noise that fades to flat toward FIELD_RADIUS
+function hillsAt(x, z) {
   const n = (perlin(x * 0.01, z * 0.02) + 0.05 * perlin(x * 0.01, z * 0.03)) * 0.5;
   const dist = Math.hypot(x, z); // distance from the center
 
   const d = Math.min(1, dist / FIELD_RADIUS);
   const centerBoost = 1 - d * d * (3 - 2 * d);
-  const peak = Math.pow(Math.max(0, 1 - dist / PEAK_RADIUS), 2);
 
-  let height = n * centerBoost * MAX_HEIGHT + peak * PEAK_HEIGHT; // the terrain as before
+  return n * centerBoost * MAX_HEIGHT;
+}
 
-  // 1. Flat summit: blend to exactly PLATEAU_HEIGHT near the center
-  const summit = 1 - smooth(PLATEAU_RADIUS, PLATEAU_RADIUS + SLOPE_WIDTH, dist);
-  height = height + (PLATEAU_HEIGHT - height) * summit;
-
-  // 2. Crater: blend to a flat floor below the summit
-  const crater = 1 - smooth(CRATER_RADIUS - CRATER_EDGE, CRATER_RADIUS, dist);
-  height = height + (PLATEAU_HEIGHT - CRATER_DEPTH - height) * crater;
+// Final terrain: hills plus the central peak, flat summit, and crater
+export function heightAt(x, z) {
+  let height
+  if(bigHillsAt(x,z) > 60) { // make hills flat, no water damage 
+    height = bigHillsAt(x,z) + hillsAt(x, z)/5; 
+  }
+  else{ // if not a hill, add peaks from water damage
+   height = hillsAt(x, z) + bigHillsAt(x,z) //+ peak * PEAK_HEIGHT; // the terrain as before
+  }
 
   return height;
 }
 
 
-function createPeaks(x,z) {
-
-}
 
 
 /* Hills/Snowdrifts mesh */
-export function createHills(size = 5000, segments = 500) {
+export function createHills(size = 5000, segments = 1000) {
   const geo = new THREE.PlaneGeometry(size, size, segments, segments);
   geo.rotateX(-Math.PI / 2); // lay it flat so y is up
 
-    const low = new THREE.Color(hillColors[0]);  // field and valleys
-    const mid = new THREE.Color(hillColors[1]);  //hillsides
-    const high = new THREE.Color(hillColors[2]); // peaks)
+    const low = new THREE.Color(COLORS.hillColors[0]);  // field and valleys
+    const mid = new THREE.Color(COLORS.hillColors[1]);  //hillsides
+    const high = new THREE.Color(COLORS.hillColors[2]); // peaks)
     const colors = [];
     const pos = geo.attributes.position;
 
@@ -106,8 +116,8 @@ export function createHills(size = 5000, segments = 500) {
     pos.setY(i, h); 
 
     // ...existing t and color blend code that makes `c`...
-    const grain = 1 + perlin(x * 0.9, z * 0.1); 
-    c.multiplyScalar(grain);                            // lighten or darken this vertex
+    //in(x * 0.9, z * 0.1); 
+    //c.multiplyScalar(grain);                            // lighten or darken this vertex
   
     colors.push(c.r, c.g, c.b);
   }
@@ -122,12 +132,22 @@ export function createMap(scene) {
     // 1. Create the geometry (width, height, widthSegments, heightSegments)
     const geometry = new THREE.PlaneGeometry(5000, 5000);
 
+    //const textureLoader = new THREE.TextureLoader();
+   //const texture = textureLoader.load('/media/bluescreen.png');
+
+// 3. Create the material using the texture as the map
+//const material = new THREE.MeshBasicMaterial({ 
+  //map: texture, 
+  //side: THREE.DoubleSide // Optional: makes the photo visible from both sides
+//});
+
+
     // 2. Create a material (DoubleSide allows it to be seen from the back)
-    const material = new THREE.MeshBasicMaterial({ 
+   const material = new THREE.MeshBasicMaterial({ 
     color: 0x00ff00, 
     side: THREE.DoubleSide, 
     });
-
+  
     // 3. Combine into a mesh
     const planeMesh = new THREE.Mesh(geometry, material);
 

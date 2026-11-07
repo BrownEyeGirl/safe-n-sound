@@ -24,6 +24,9 @@ import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'
 import { attachCamera, moveMesh } from './cameraControls.js';
 
 import { Can, checkCanCollection, cans } from './items/cans.js'; 
+
+import * as COLORS from './style/colors.js'; 
+
 let scene, renderer, controls, camera, player, cyborg,loc;
 let flock; // global variable for the flock of birds
 const clock = new THREE.Clock();
@@ -92,12 +95,12 @@ let lavender = 0xE4E0FF
 
   // scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xffffff)
-  //scene.fog = new THREE.Fog(0xffffff, 0, 1000); // new fog, darker, shorter range
+  scene.background = new THREE.Color(COLORS.backgroundFog)
+  scene.fog = new THREE.Fog(COLORS.backgroundFog, 0, 1000); // new fog, darker, shorter range
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( 0xffffff, 1 ); // soft white light
+const light = new THREE.AmbientLight( 0x2CFA1F, 1 ); // soft white light
 light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
 
@@ -121,8 +124,8 @@ loadArchitecture(); // load the base and other architecture
 
   /* Birds eye view camera for map */
   if(birdsEyeView) {
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);   // 0. Add ambient light to the scene
-    scene.add(ambientLight);
+    //const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);   // 0. Add ambient light to the scene
+   // scene.add(ambientLight);
     const width = window.innerWidth;  // 1. Create a PerspectiveCamera or OrthographicCamera
     const height = window.innerHeight; 
     camera = new THREE.PerspectiveCamera(150, width / height, 1, 20000); // camera to make map 
@@ -246,12 +249,12 @@ composer.render();
   // Conditional rendering switch
     if (the_fog) {
         composer.render();
-        scene.background = new THREE.Color(0x101518)
-        scene.fog = new THREE.Fog(0x000000, 0, 700); // new fog, darker, shorter range
+        scene.background = new THREE.Color(COLORS.backgroundFog)
+        //scene.fog = new THREE.Fog(0x000000, 0, 700); // new fog, darker, shorter range
     } else {
         //renderer.render(scene, camera);
-        scene.background = new THREE.Color(lavender)
-        scene.fog = new THREE.Fog(lavender, 0, 1000); // new fog, darker, shorter range
+        scene.background = new THREE.Color(COLORS.backgroundFog)
+        //scene.fog = new THREE.Fog(lavender, 0, 300); // new fog, darker, shorter range
     }
 }
 
@@ -266,7 +269,7 @@ function loadArchitecture() {
 //  scene.add(loadBuilding(bando1)); 
   scene.add(loadBuilding(base)); 
   scene.add(loadBuilding(parking_garage));
-  scene.add(loadBuilding(dumpster))
+  scene.add(loadBuilding(dumpster)); 
   scene.add(generateWalls()); // load walls around the base
 }
 
@@ -301,6 +304,10 @@ function loadBuilding(building) {
     const b = gltf.scene;
     b.scale.set(building.scale, building.scale, building.scale);
 
+    // get it to absorb light 
+    b.traverse((child) => {
+  if (child.isMesh) child.material = new THREE.MeshLambertMaterial({ map: child.material.map, color: child.material.color });
+   });
     // attemtp to create boundign box
   /// 1. Create an empty Box3 bounding box
     const box = new THREE.Box3();
@@ -323,13 +330,9 @@ function loadBuilding(building) {
     group.add(b); // appears in the scene once loaded
   });
 
-
     const x = building.x;
     const z = building.z;
     group.position.set(x, heightAt(x, z)+modelHeight, z);
-  
-
-
 
   return group;
 }
