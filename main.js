@@ -85,10 +85,10 @@ let dumpster = {
   scale: 250,
 }
 let flower = {
-  scale: 100,
+  scale: 0.1,
   seed: 69,
-  count: 500,
-  model: "media/lowpoly_flower/scene.gltf",
+  count: 50,
+  model: "media/dead_tree/scene.gltf",
 }
 
 
@@ -287,9 +287,10 @@ scene.add(flock.points);
 }
 
 function loadPlants() {
-//  scene.add(generatePlants(trees)); // generate trees
+  scene.add(generatePlants(trees)); // generate trees
+  scene.add(generatePlants(dead_trees));
+
   scene.add(generateFlowers(flower));
-//  scene.add(generatePlants(dead_trees));
 }
 
 function loadComponents() {
@@ -334,7 +335,7 @@ function loadComponents() {
     // 4. Access the height via the 'y' property
      modelHeight = size.y;
 
-    group.add(boxH);
+    group.add(boxH); 
     group.add(b); // appears in the scene once loaded
 
     const x = building.x;

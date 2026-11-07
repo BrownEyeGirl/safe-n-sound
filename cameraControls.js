@@ -40,7 +40,6 @@ export function updateCamera(camera, dt) {
 export function attachCamera(mounted, camera, target, domElement = document.body, options = {}) {
   let { pitchMin = 0.5, pivotHeight = 7, radius = 10, startPitch = 0.5 } = options;
 
-
   const pivot = new THREE.Object3D();
   pivot.position.set(0, pivotHeight, 0);
   target.add(pivot);
@@ -61,7 +60,7 @@ export function attachCamera(mounted, camera, target, domElement = document.body
   };
   domElement.addEventListener('click', onClick);
   document.addEventListener('mousemove', onMouseMove);
-
+  
   function detach() {
     domElement.removeEventListener('click', onClick);
     document.removeEventListener('mousemove', onMouseMove);

@@ -297,47 +297,42 @@ export function generateWalls() { // source, derived: https://discourse.threejs.
 }
 
 
-/* seeded perlin / simplex ? noise generator for plants */ 
-export function generateFlowers(item) { // 
-  const rand = mulberry32(item.seed);
-  const noise2D = createNoise2D(rand); // generate the perlin noise
-  const loader = new GLTFLoader(); // loader for all of the gltf files 
-  const items = new THREE.Group();
+/* seeded perlin / simplex noise generator for plants */
+export function generateFlowers(item) {
+  const rand = mulberry32(item.seed); // seeded random, same numbers every load
+  const noise2D = createNoise2D(rand); // noise function using the seeded random (unused for now)
+  const loader = new GLTFLoader(); // loads gltf model files
+  const items = new THREE.Group(); // container for all the flowers
 
-  loader.load(item.model, function(gltf) {
-  const baseFlower = gltf.scene;
-  items.scale.set(item.scale,item.scale,item.scale); 
-  const center = 2000;
+  loader.load(item.model, function(gltf) { // runs once the model has loaded
+    const baseFlower = gltf.scene; // original flower, we clone it for each one
+    // note: no items.scale here, scaling the group would also shrink the positions
 
-  // increase this for density
-  for (let i = 0; i < item.count; i++) {
+    const radius = 500; // how far out flowers can spawn
+    const cx = 0; // circle centre x
+    const cz = 0; // circle centre z
 
-  // square distribution (same every load)
-  const x = (rand() - 0.5) * center + 500;
-  const z = (rand() - 0.5) * center + 1000;
+    for (let i = 0; i < item.count; i++) { // one flower per loop
 
-  // noise filter (controls clustering)
-  const n = noise2D(x * 0.001, z * 0.001);
+      // random point inside a circle
+      const angle = rand() * Math.PI * 2; // random direction
+      const dist = Math.sqrt(rand()) * radius; // random distance, sqrt keeps it evenly spread
+      const x = cx + Math.cos(angle) * dist; // angle + distance -> x
+      const z = cz + Math.sin(angle) * dist; // angle + distance -> z
 
-    if (n > 0.1) { // lower threshold = more flowers
-      const flower = baseFlower.clone(true); // 
-      flower.position.set(x, heightAt(x,z), z);
+      //const n = noise2D(x * 0.001, z * 0.001); // optional clustering filter
+      //if (n > 0.1) { ... }
 
-      // variation (makes it look natural)
-      //const s = 15 + Math.random() * 10;
-      //flower.scale.set(s, s, s);
+      const flower = baseFlower.clone(true); // copy the flower
+      flower.scale.setScalar(item.scale); // scale each flower on its own instead of the group
+      flower.position.set(x, heightAt(x, z), z); // set position on the clone, not baseFlower
+      flower.rotation.y = rand() * Math.PI * 2; // random spin
 
-      flower.rotation.y = Math.random() * Math.PI * 2;
-      if(flower.position.y > 5) {
-        items.add(flower);
-      }
+      items.add(flower); // add it to the group
     }
-  }
-  }); 
-  return items;
 
+    console.log(items.children.length); // logs here, after the flowers actually exist
+  });
+
+  return items; // starts empty, fills up once the model loads
 }
-
-
-
-
