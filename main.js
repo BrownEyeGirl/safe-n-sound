@@ -17,7 +17,7 @@ import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
 
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
-import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
+import { createHills, createMap, createBase, generatePlants, generateFlowers, generateWalls } from './world.js';
 import { createPlayer, updatePlayer } from './characters/player.js';
 import { renderParticles } from './boids.js';
 import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
@@ -84,6 +84,13 @@ let dumpster = {
   model: "media/dumpster_clean.glb",
   scale: 250,
 }
+let flower = {
+  scale: 100,
+  seed: 69,
+  count: 500,
+  model: "media/lowpoly_flower/scene.gltf",
+}
+
 
 
 let the_fog = false; 
@@ -280,8 +287,9 @@ scene.add(flock.points);
 }
 
 function loadPlants() {
-  scene.add(generatePlants(trees)); // generate trees
-  scene.add(generatePlants(dead_trees))
+//  scene.add(generatePlants(trees)); // generate trees
+  scene.add(generateFlowers(flower));
+//  scene.add(generatePlants(dead_trees));
 }
 
 function loadComponents() {
@@ -295,9 +303,12 @@ function loadComponents() {
 
 }
 
-function loadBuilding(building) {
-  const group = new THREE.Group(); // makes it a 3d object somehow 
+
+
+ function loadBuilding(building) {
+
   const loader = new GLTFLoader();
+  const group = new THREE.Group(); // makes it a 3d object somehow 
   let modelHeight = 0; 
 
   loader.load(building.model, (gltf) => {
@@ -307,8 +318,7 @@ function loadBuilding(building) {
     // get it to absorb light 
     b.traverse((child) => {
   if (child.isMesh) child.material = new THREE.MeshLambertMaterial({ map: child.material.map, color: child.material.color });
-   });
-    // attemtp to create boundign box
+  
   /// 1. Create an empty Box3 bounding box
     const box = new THREE.Box3();
 
@@ -324,18 +334,25 @@ function loadBuilding(building) {
     // 4. Access the height via the 'y' property
      modelHeight = size.y;
 
-    console.log(modelHeight)
-
     group.add(boxH);
     group.add(b); // appears in the scene once loaded
-  });
 
     const x = building.x;
     const z = building.z;
-    group.position.set(x, heightAt(x, z)+modelHeight, z);
+    group.position.set(x, heightAt(x, z)+modelHeight/2, z);
+    console.log("2nd pass model height" + modelHeight)
+
+  });    
+});
+
+   
 
   return group;
 }
+
+
+
+
 
 // check if mounted 
 let mount_rad = 700

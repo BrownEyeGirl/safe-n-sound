@@ -297,5 +297,47 @@ export function generateWalls() { // source, derived: https://discourse.threejs.
 }
 
 
+/* seeded perlin / simplex ? noise generator for plants */ 
+export function generateFlowers(item) { // 
+  const rand = mulberry32(item.seed);
+  const noise2D = createNoise2D(rand); // generate the perlin noise
+  const loader = new GLTFLoader(); // loader for all of the gltf files 
+  const items = new THREE.Group();
+
+  loader.load(item.model, function(gltf) {
+  const baseFlower = gltf.scene;
+  items.scale.set(item.scale,item.scale,item.scale); 
+  const center = 2000;
+
+  // increase this for density
+  for (let i = 0; i < item.count; i++) {
+
+  // square distribution (same every load)
+  const x = (rand() - 0.5) * center + 500;
+  const z = (rand() - 0.5) * center + 1000;
+
+  // noise filter (controls clustering)
+  const n = noise2D(x * 0.001, z * 0.001);
+
+    if (n > 0.1) { // lower threshold = more flowers
+      const flower = baseFlower.clone(true); // 
+      flower.position.set(x, heightAt(x,z), z);
+
+      // variation (makes it look natural)
+      //const s = 15 + Math.random() * 10;
+      //flower.scale.set(s, s, s);
+
+      flower.rotation.y = Math.random() * Math.PI * 2;
+      if(flower.position.y > 5) {
+        items.add(flower);
+      }
+    }
+  }
+  }); 
+  return items;
+
+}
+
+
 
 
