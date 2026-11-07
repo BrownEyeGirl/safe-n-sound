@@ -362,7 +362,7 @@ function mount() {
   });
   mounted = true;
 }
-
+ 
 function dismount() {
   rig.detach();
   scene.attach(player); // keeps the player's world position
