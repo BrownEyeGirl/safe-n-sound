@@ -17,13 +17,14 @@ import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
 
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
-import { createHills, createMap, createBase, generatePlants, generateFlowers, generateWalls } from './world.js';
+import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
 import { createPlayer, updatePlayer } from './characters/player.js';
 import { renderParticles } from './boids.js';
 import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
 import { attachCamera, moveMesh } from './cameraControls.js';
 
 import { Can, checkCanCollection, cans } from './items/cans.js'; 
+import { Flower, checkFlowerCollection, flowers } from './items/flowers.js'; 
 
 import * as COLORS from './style/colors.js'; 
 
@@ -222,7 +223,6 @@ const skyLoader = new RGBELoader();
   scene.backgroundRotation.y = Math.PI / 2;
 });*/
 
-
 animate()
 function animate() {
 
@@ -250,6 +250,8 @@ function animate() {
   }
 
   checkCanCollection(player, cans); 
+  checkFlowerCollection(player, flowers); 
+
   requestAnimationFrame(animate);
 
 composer.render(); 
@@ -289,23 +291,25 @@ scene.add(flock.points);
 function loadPlants() {
   scene.add(generatePlants(trees)); // generate trees
   scene.add(generatePlants(dead_trees));
-
-  scene.add(generateFlowers(flower));
 }
 
+/* Loads collectables */ 
 function loadComponents() {
-
   const can1 = new Can(
   scene,
    new THREE.Vector3(100,
    heightAt(0,0)+10,
    100)
+
 );
+
+
+  //flowers = generateFlowers(flower); 
+//  scene.add(flowers);
 
 }
 
-
-
+/* Loads in GLTF building */ 
  function loadBuilding(building) {
 
   const loader = new GLTFLoader();
@@ -357,7 +361,7 @@ function loadComponents() {
 
 // check if mounted 
 let mount_rad = 700
-const CYBORG_SPEED = 100; // attempt to move cyborhg
+const CYBORG_SPEED = 60; // attempt to move cyborhg
 
 window.addEventListener('keydown', (e) => {
   if (e.code !== 'Space' || e.repeat) return;  // e.repeat stops hold-key retriggering
