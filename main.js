@@ -277,7 +277,7 @@ function loadArchitecture() {
   scene.add(loadBuilding(base)); 
   scene.add(loadBuilding(parking_garage));
   scene.add(loadBuilding(dumpster)); 
-  scene.add(generateWalls()); // load walls around the base
+  scene.add(generateWalls(100,10)); // load walls around the base
 }
 
 function loadAnimals() {

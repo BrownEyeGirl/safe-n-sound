@@ -252,15 +252,15 @@ export function generatePlants(item) { //
 }
 
 /* Wall of buildings pngs */
-export function generateWalls() { // source, derived: https://discourse.threejs.org/t/whats-the-latest-way-to-load-an-image/44246 
+export function generateWalls(radius = 3000, count = 20) { // source, derived: https://discourse.threejs.org/t/whats-the-latest-way-to-load-an-image/44246 
   const images = ['media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg'];  
   const loader = new THREE.TextureLoader(); // initialize texture 
   const walls = new THREE.Group();
   let texture, geometryImg, materialImg, wall;
 
   // circle parameters
-  const radius = 3000;  
-  const count = 20; // Number of images to place around the circle
+  //const radius = 3000;  
+  //const count = 20; // Number of images to place around the circle
   const width = 2 * radius * Math.tan(Math.PI / count); // in radians, so tan(pi/count) = centre of image (opp = width/2) / radius of circle (adj), so width = 2 * r * tan(pi/count)
 
   // Loop through a full circle
