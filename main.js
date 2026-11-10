@@ -112,12 +112,11 @@ light.distance = 10000; // size of perlin noise snowdrift map
 scene.add( light );
 
 
-createMap(scene); 
 let hills = createHills(); 
 scene.add(hills);
 loadAnimals(); // load the boids (birds) into the scene
 loadPlants(); // load the trees into the scene
-loadComponents(); 
+loadReplen(); 
 console.log(cans)
 loadArchitecture(); // load the base and other architecture
 
@@ -280,7 +279,6 @@ function loadArchitecture() {
   scene.add(loadBuilding(base)); 
   scene.add(loadBuilding(parking_garage));
   scene.add(loadBuilding(dumpster)); 
-  scene.add(generateWalls(200,400,100,10)); // load walls around the base
 }
 
 function loadAnimals() {
@@ -294,9 +292,18 @@ function loadPlants() {
   scene.add(generatePlants(dead_trees));
 }
 
-/* Loads collectables */ 
-function loadComponents() {
- spawnCans(scene, 0,0,500,100); 
+/* Loads replenish  */ 
+
+
+function loadReplen() {
+  let x = 0
+  let z = 800
+  let radius = 500
+
+ scene.add(generateWalls(x,z,radius,20)); // x,z,radius,count
+ spawnCans(scene, x,z,radius,100);  //x,z,radius,count
+ createMap(scene, x,z,radius); 
+
 }
 
 /* Loads in GLTF building */ 
@@ -345,10 +352,6 @@ function loadComponents() {
   return group;
 }
 
-
-function loadReplen() {
-  
-}
 
 
 

@@ -74,11 +74,13 @@ export function generateCans(scene, cx, cz, radius, count) {
       const x = cx + Math.cos(angle) * dist; // angle + distance from center -> x
       const z = cz + Math.sin(angle) * dist; // angle + distance from c -> z
 
-      const can = new Can(
-            scene,
-            new THREE.Vector3(x, heightAt(x,z), z)
-     );
-     cans.push(can)
+      if(heightAt(x,z) > 5) {
+        const can = new Can(
+                scene,
+                new THREE.Vector3(x, heightAt(x,z), z)
+        );
+        cans.push(can)
+    }
     }
 }
 

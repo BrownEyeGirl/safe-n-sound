@@ -128,9 +128,9 @@ export function createHills(size = 5000, segments = 1000) {
   return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true})); // vertexColors: true }));
 }
 
-export function createMap(scene) {
+export function createMap(scene,x,z, radius ) {
     // 1. Create the geometry (width, height, widthSegments, heightSegments)
-    const geometry = new THREE.PlaneGeometry(5000, 5000);
+    //const geometry = new THREE.CircleGeometry(radius, 50);
 
     //const textureLoader = new THREE.TextureLoader();
    //const texture = textureLoader.load('/media/bluescreen.png');
@@ -143,9 +143,8 @@ export function createMap(scene) {
 
 
     // 2. Create a material (DoubleSide allows it to be seen from the back)
-   const material = new THREE.MeshBasicMaterial({ 
+   /*const material = new THREE.MeshBasicMaterial({ 
     color: 0x00ff00, 
-    side: THREE.DoubleSide, 
     });
   
     // 3. Combine into a mesh
@@ -154,8 +153,21 @@ export function createMap(scene) {
     // 4. By default, planes are vertical (facing the Z-axis). 
     // To make it a horizontal floor, rotate it 90 degrees around the X-axis:
     planeMesh.rotation.x = -Math.PI / 2;
-    planeMesh.position.y=0
-    scene.add(planeMesh)
+    planeMesh.position.y=0*/
+    // 1. Create the circle geometry: radius = 5, segments = 32
+const geometry = new THREE.CircleGeometry(radius, 32);
+
+// 2. Create a material (side: DoubleSide lets you see it from both front and back)
+const material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+
+// 3. Combine them into a mesh and add to your scene
+const circle = new THREE.Mesh(geometry, material);
+circle.rotation.x = -Math.PI/2; 
+circle.position.x = x; 
+circle.position.z = z; 
+circle.position.y = 0.5; 
+scene.add(circle);
+
 }
 
 export function createBase() {
@@ -252,46 +264,33 @@ export function generatePlants(item) { //
 }
 
 /* Wall of buildings pngs */
-export function generateWalls(cx=0, cz=0, radius = 3000, count = 20) { // source, derived: https://discourse.threejs.org/t/whats-the-latest-way-to-load-an-image/44246 
-  const images = ['media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg'];  
-  const loader = new THREE.TextureLoader(); // initialize texture 
+export function generateWalls(cx = 0, cz = 0, radius = 3000, count = 20) {
+  const loader = new THREE.TextureLoader();
   const walls = new THREE.Group();
-  let texture, geometryImg, materialImg, wall;
 
-  // circle parameters
-  //const radius = 3000;  
-  //const count = 20; // Number of images to place around the circle
-  const width = 2 * radius * Math.tan(Math.PI / count); // in radians, so tan(pi/count) = centre of image (opp = width/2) / radius of circle (adj), so width = 2 * r * tan(pi/count)
+  const width = 2 * radius * Math.tan(Math.PI / count);
 
-  // Loop through a full circle
+  // Load the texture and build the geometry ONCE, then reuse them
+  const texture = loader.load('media/buildings_imgs/wall1.jpg');
+  const geometryImg = new THREE.PlaneGeometry(width, width);
+  const materialImg = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.DoubleSide
+  });
+
   for (let i = 0; i < count; i++) {
-      const radians = i/count * Math.PI *2 + cx;  // Convert degrees to radians
+    const radians = (i / count) * Math.PI * 2;   // angle only, no cx here
 
-      // 5. Create and position your Three.js object
-      texture = loader.load(images[0]);
-      geometryImg = new THREE.PlaneGeometry(width, width); // Width, Height. will be the same as each increment to fil the gaps 
+    // offset from the circle's center
+    const x = cx + radius * Math.cos(radians);
+    const z = cz + radius * Math.sin(radians);
+    const y = width;
 
-      // Create a material and pass the texture to the 'map' property
-      materialImg = new THREE.MeshBasicMaterial({ 
-          map: texture,
-          side: THREE.DoubleSide // Makes the image visible from both sides
-      });
-
-      wall = new THREE.Mesh(geometryImg, materialImg);
-      
-      // Calculate X and Z positions (for a horizontal circle on the XZ plane)
-      const x = radius * Math.cos(radians);
-      const z = radius * Math.sin(radians);
-      const y =  0+width;//heightAt(x,z); // change based on where bumps are
-
-      // Apply the coordinates
-      wall.position.set(x, y, z);
-      
-      // rotate the object to face the center of the circle
-      wall.lookAt(0, y, 0);
-      walls.add(wall); 
-    
+    const wall = new THREE.Mesh(geometryImg, materialImg);
+    wall.position.set(x, y-150, z);
+    wall.lookAt(cx, y-150, cz);                      // face the NEW center
+    walls.add(wall);
   }
-    // return array of wall material segments and their positions 
-      return walls; 
+
+  return walls;
 }
