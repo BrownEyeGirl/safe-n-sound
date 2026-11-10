@@ -14,7 +14,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
-//
+
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
 import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
@@ -23,11 +23,11 @@ import { renderParticles } from './boids.js';
 import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
 import { attachCamera, moveMesh } from './cameraControls.js';
 
-import { Can, checkCanCollection, cans } from './items/cans.js'; 
-import { Flower, checkFlowerCollection, flowers } from './items/flowers.js'; 
+import { Can, checkCanCollection, spawnCans, cans } from './items/cans.js'; 
+//import { Flower, checkFlowerCollection, flowers } from './items/flowers.js'; 
 
 import * as COLORS from './style/colors.js'; 
-
+///
 let scene, renderer, controls, camera, player, cyborg,loc;
 let flock; // global variable for the flock of birds
 const clock = new THREE.Clock();
@@ -37,7 +37,6 @@ let rig; // current camera rig, can be attached/detached when switchign meshes
 let cyborgGroundOffset = 0;
 const playerWorld = new THREE.Vector3();
 let mounted = false;
-
 
 /* Items */ 
 let trees = {
@@ -94,7 +93,7 @@ let flower = {
 
 
 
-let the_fog = false; 
+let the_fog = true; 
 let birdsEyeView = false; // toggle for birds eye view camera
 
 
@@ -108,7 +107,7 @@ let lavender = 0xE4E0FF
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( 0x2CFA1F, 1 ); // soft white light
+const light = new THREE.AmbientLight( COLORS.ambientL, 1 ); // soft white light
 light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
 
@@ -136,14 +135,14 @@ loadArchitecture(); // load the base and other architecture
    // scene.add(ambientLight);
     const width = window.innerWidth;  // 1. Create a PerspectiveCamera or OrthographicCamera
     const height = window.innerHeight; 
-    camera = new THREE.PerspectiveCamera(150, width / height, 1, 20000); // camera to make map 
+    camera = new THREE.PerspectiveCamera(100, width / height, 1, 20000); // camera to make map 
     
     camera.position.set(0, 1000, 0); // X, Y (height), Z. 2. Position high up on the Y-axis looking straight down. 
     camera.lookAt(0, 0, 0);  // 3. Point the camera at the center of the scene (or use lookAt)
   }
 
   if(!birdsEyeView) {
-    camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(105, window.innerWidth / window.innerHeight, 0.4, 1000);
     
     cyborg = createCyborg(scene, camera); 
     player = createPlayer(scene);
@@ -196,6 +195,8 @@ loadArchitecture(); // load the base and other architecture
     };
   const halftonePass = new HalftonePass( params );
   //composer.addPass( halftonePass );
+
+
 
   const dotScreen = new ShaderPass( DotScreenShader );
 dotScreen.uniforms[ 'scale' ].value = 4;
@@ -250,7 +251,7 @@ function animate() {
   }
 
   checkCanCollection(player, cans); 
-  checkFlowerCollection(player, flowers); 
+  //ƒcheckFlowerCollection(player, flowers); 
 
   requestAnimationFrame(animate);
 
@@ -295,18 +296,7 @@ function loadPlants() {
 
 /* Loads collectables */ 
 function loadComponents() {
-  const can1 = new Can(
-  scene,
-   new THREE.Vector3(100,
-   heightAt(0,0)+10,
-   100)
-
-);
-
-
-  //flowers = generateFlowers(flower); 
-//  scene.add(flowers);
-
+ spawnCans(scene, 0,0,500,100); 
 }
 
 /* Loads in GLTF building */ 
@@ -356,6 +346,9 @@ function loadComponents() {
 }
 
 
+function loadReplen() {
+  
+}
 
 
 

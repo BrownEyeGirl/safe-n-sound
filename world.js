@@ -252,7 +252,7 @@ export function generatePlants(item) { //
 }
 
 /* Wall of buildings pngs */
-export function generateWalls(radius = 3000, count = 20) { // source, derived: https://discourse.threejs.org/t/whats-the-latest-way-to-load-an-image/44246 
+export function generateWalls(cx=0, cz=0, radius = 3000, count = 20) { // source, derived: https://discourse.threejs.org/t/whats-the-latest-way-to-load-an-image/44246 
   const images = ['media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg', 'media/buildings_imgs/wall1.jpg'];  
   const loader = new THREE.TextureLoader(); // initialize texture 
   const walls = new THREE.Group();
@@ -280,8 +280,8 @@ export function generateWalls(radius = 3000, count = 20) { // source, derived: h
       wall = new THREE.Mesh(geometryImg, materialImg);
       
       // Calculate X and Z positions (for a horizontal circle on the XZ plane)
-      const x = radius * Math.cos(radians);
-      const z = radius * Math.sin(radians);
+      const x = radius * Math.cos(radians)+cx;
+      const z = radius * Math.sin(radians)+cz;
       const y =  0+width;//heightAt(x,z); // change based on where bumps are
 
       // Apply the coordinates

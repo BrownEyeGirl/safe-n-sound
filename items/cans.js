@@ -1,7 +1,10 @@
 import * as THREE from 'three';
+import { mulberry32, heightAt } from '../world.js'
 
 
 export let cans = []
+const visibleDist = 100; 
+const collectionDist = 10; 
 
 export class Can {
     constructor(scene, position) {
@@ -22,13 +25,13 @@ export class Can {
         });
 
         this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.scale.set(50,50,50)
+        this.mesh.scale.set(10,10,10)
         this.mesh.position.copy(position); // set position 
 
 
         // bounding box 
         // Create bounding box helper
-        this.boundingBox = new THREE.BoxHelper(this.mesh, 0xffff00);
+        this.boundingBox = new THREE.BoxHelper(this.mesh, 0x04D9FF);
 
         // Hide initially
         this.boundingBox.visible = false;
@@ -39,16 +42,44 @@ export class Can {
         cans.push(this) // add enture enstance to array
         this.scene.add(this.mesh); // add to scene 
     }
+
+    getMesh() {
+        return this.mesh; 
+    }
+    
+    collect() {
+        this.mesh.visible = false; 
+        this.boundingBox.visible = false; 
+    }
 }
 
-export function spawnCan(scene, x, y, z) {
+export function spawnCans(scene, x, z, radius, count) {
+    generateCans(scene, x,z,radius,count)
+ 
+}
 
-    const can = new Can(
-        scene,
-        new THREE.Vector3(x, y, z)
-    );
 
-    return can;
+/* seeded perlin / simplex noise generator for plants */
+export function generateCans(scene, cx, cz, radius, count) {
+  const rand = mulberry32(69); // seeded random, same numbers every load
+  const items = new THREE.Group(); // container for all the flowers
+  const f = new THREE.Group(); 
+
+  for (let i = 0; i < count; i++) { // one flower per loop
+
+     
+      // random point inside a circle
+      const angle = rand() * Math.PI * 2; // random direction
+      const dist = Math.sqrt(rand()) * radius; // random distance, sqrt keeps it evenly spread
+      const x = cx + Math.cos(angle) * dist; // angle + distance from center -> x
+      const z = cz + Math.sin(angle) * dist; // angle + distance from c -> z
+
+      const can = new Can(
+            scene,
+            new THREE.Vector3(x, heightAt(x,z), z)
+     );
+     cans.push(can)
+    }
 }
 
 export function checkCanCollection(player, cans) {
@@ -57,27 +88,16 @@ export function checkCanCollection(player, cans) {
 
         if (can.collected) continue;
 
-        if (player.position.distanceTo(can.mesh.position) < 100) {
+        if (player.position.distanceTo(can.mesh.position) < visibleDist) {
 
-            // Show bounding box
             can.boundingBox.visible = true;
 
             console.log("Can nearby!");
-
-            // can.collect();
+            if(player.position.distanceTo(can.mesh.position) < collectionDist) {
+                can.collected = true; 
+                can.collect() 
+            }
         }
-
-    
-        /*if (cyborg.position.distanceTo(can.mesh.position) < 100) {
-
-            // Show bounding box
-            can.boundingBox.visible = true;
-
-            console.log("Can nearby!");
-
-            // can.collect();
-        }*/
-
 
         else {
             can.boundingBox.visible = false;
@@ -98,3 +118,6 @@ function radarBox(can, scene) {
     scene.add(boxH)
 
 }
+
+
+

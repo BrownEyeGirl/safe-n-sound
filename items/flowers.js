@@ -1,4 +1,4 @@
-/* seeded perlin / simplex noise generator for plants */
+/* seeded perlin / simplex noise generator for plants 
 export function generateFlowers(item) {
   const rand = mulberry32(item.seed); // seeded random, same numbers every load
   const loader = new GLTFLoader(); // loads gltf model files
@@ -61,4 +61,4 @@ export function checkFlowerCollection(player, flowers) {
             flower.boundingBox.visible = false;
         }
     }
-}
+}*/
