@@ -265,7 +265,7 @@ export function generateWalls(cx=0, cz=0, radius = 3000, count = 20) { // source
 
   // Loop through a full circle
   for (let i = 0; i < count; i++) {
-      const radians = i/count * Math.PI *2;  // Convert degrees to radians
+      const radians = i/count * Math.PI *2 + cx;  // Convert degrees to radians
 
       // 5. Create and position your Three.js object
       texture = loader.load(images[0]);
@@ -280,8 +280,8 @@ export function generateWalls(cx=0, cz=0, radius = 3000, count = 20) { // source
       wall = new THREE.Mesh(geometryImg, materialImg);
       
       // Calculate X and Z positions (for a horizontal circle on the XZ plane)
-      const x = radius * Math.cos(radians)+cx;
-      const z = radius * Math.sin(radians)+cz;
+      const x = radius * Math.cos(radians);
+      const z = radius * Math.sin(radians);
       const y =  0+width;//heightAt(x,z); // change based on where bumps are
 
       // Apply the coordinates

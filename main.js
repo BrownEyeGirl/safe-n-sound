@@ -107,7 +107,7 @@ let lavender = 0xE4E0FF
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( COLORS.ambientL, 1 ); // soft white light
+const light = new THREE.AmbientLight( COLORS.ambientL, 2 ); // soft white light
 light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
 
@@ -280,7 +280,7 @@ function loadArchitecture() {
   scene.add(loadBuilding(base)); 
   scene.add(loadBuilding(parking_garage));
   scene.add(loadBuilding(dumpster)); 
-  scene.add(generateWalls(100,10)); // load walls around the base
+  scene.add(generateWalls(200,400,100,10)); // load walls around the base
 }
 
 function loadAnimals() {
