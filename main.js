@@ -14,7 +14,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
-
+//
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
 import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
