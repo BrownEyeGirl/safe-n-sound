@@ -238,7 +238,16 @@ const skyLoader = new RGBELoader();
 });*/
 
 animate()
+// check if mounted 
+let mount_rad = 700
+const CYBORG_SPEED = 60; // attempt to move cyborhg
+const PLAYER_SPEED = 30; 
+
 function animate() {
+
+  let mount_rad = 700
+const CYBORG_SPEED = 60; // attempt to move cyborhg
+const PLAYER_SPEED = 30; 
 
   //if(!birdsEyeView) {updatePlayer(player, clock.getDelta());} // move the camera based on held keys (if not on birds eye view development mode)
   if(!birdsEyeView) {
@@ -257,9 +266,9 @@ function animate() {
       moveMesh(cyborg, dt, CYBORG_SPEED);
       cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z) + cyborgGroundOffset;
     } else {
-      updatePlayer(player, dt);
+      updatePlayer(player, dt, PLAYER_SPEED);
     }
-    updatePlayer(player, clock.getDelta());
+    //updatePlayer(player, clock.getDelta(), PLAYER_SPEED);
     flock.update(); // birds
   }
 
@@ -370,9 +379,7 @@ function loadReplen() {
 
 
 
-// check if mounted 
-let mount_rad = 700
-const CYBORG_SPEED = 60; // attempt to move cyborhg
+
 
 window.addEventListener('keydown', (e) => {
   if (e.code !== 'Space' || e.repeat) return;  // e.repeat stops hold-key retriggering

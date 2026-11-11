@@ -32,7 +32,7 @@ export function createPlayer(scene) {
   return player;
 }
 
-export function updatePlayer(player, dt) {
+export function updatePlayer(player, dt, MOVE_SPEED = 50) {
   moveMesh(player, dt, MOVE_SPEED);
   player.position.y = heightAt(player.position.x, player.position.z)+1;
 }
