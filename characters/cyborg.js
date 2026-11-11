@@ -29,7 +29,7 @@ export function createCyborg(scene, camera, domElement = document.body) {
     new THREE.BoxGeometry(cyborgWidth, cyborgHeight, cyborgWidth-50),
     new THREE.MeshBasicMaterial({ color: 0x0000FF })
   );
-  cyborg.position.set(0, 0, 0); 
+  cyborg.position.set(-100, 0, -100); 
   cyborg.position.y = heightAt(cyborg.position.x, cyborg.position.z) + cyborgHeight/2; // start on the ground
   scene.add(cyborg);  
 

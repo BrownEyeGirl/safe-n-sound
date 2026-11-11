@@ -336,12 +336,13 @@ function loadReplen() {
     // 4. Access the height via the 'y' property
      modelHeight = size.y;
 
-    group.add(boxH); 
+    group.add(boxH);  
+    boxH.visible = false; // hides bounding box 
     group.add(b); // appears in the scene once loaded
 
     const x = building.x;
     const z = building.z;
-    group.position.set(x, heightAt(x, z)+modelHeight/2, z);
+    group.position.set(x, heightAt(x, z)+modelHeight/2-30, z);
     console.log("2nd pass model height" + modelHeight)
 
   });    
