@@ -109,11 +109,11 @@ let lavender = 0xE4E0FF
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( COLORS.ambientL, 2 ); // soft white light
-light.distance = 10000; // size of perlin noise snowdrift map 
+const light = new THREE.AmbientLight( COLORS.ambientL, 0.8); // soft white light
+light.distance = 1000; // size of perlin noise snowdrift map 
 scene.add( light );
 
-const sun = new THREE.DirectionalLight(0xffffff, 0);
+const sun = new THREE.DirectionalLight(0xffffff, 1);
 sun.position.set(1000, 2000, 1000);
 scene.add(sun);
 
@@ -164,9 +164,9 @@ loadArchitecture(); // load the base and other architecture
   composer.addPass(new RenderPass(scene, camera));
   
     const bokeh = new BokehPass(scene, camera, {
-      focus: 50.0,        // distance where image is sharp
+      focus: 90.0,        // distance where image is sharp
       aperture: 0.0001,  // blur strength (smaller = subtle blur)
-      maxblur: 0.01      // max blur allowed
+      maxblur: 0.001      // max blur allowed
     });
    //composer.addPass(bokeh); 
     
@@ -182,8 +182,8 @@ loadArchitecture(); // load the base and other architecture
    // effect2.uniforms[ 'amount' ].value = 0.0015;
    // composer.addPass( effect2 );
 
-    //const filmPass = new FilmPass();
-   //composer.addPass( filmPass );
+    const filmPass = new FilmPass();
+   composer.addPass( filmPass );
 
    const params = {
       shape: 0.2,
@@ -191,14 +191,14 @@ loadArchitecture(); // load the base and other architecture
       rotateR: Math.PI / 12,
       rotateB: Math.PI / 12,
       rotateG: Math.PI /10,
-      scatter: 0.5,
+      scatter: 0.1,
       blending: 0.8,
       blendingMode: 1,
-      greyscale: true,
+      greyscale: false,
       disable: false
     };
   const halftonePass = new HalftonePass( params );
-  //composer.addPass( halftonePass );
+// composer.addPass( halftonePass );
 
 
 
@@ -219,7 +219,7 @@ const rgbShift = new ShaderPass( RGBShiftShader );
 rgbShift.uniforms[ 'amount' ].value = 0.0015;
 //composer.addPass( rgbShift );
 
-//composer.addPass( new OutputPass() );
+composer.addPass( new OutputPass() );
 
 
 //const skyLoader = new THREE.TextureLoader();
