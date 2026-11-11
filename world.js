@@ -129,6 +129,7 @@ export function createHills(size = 5000, segments = 1000) {
 }
 
 export function createMap(scene,x,z, radius ) {
+
     // 1. Create the geometry (width, height, widthSegments, heightSegments)
     //const geometry = new THREE.CircleGeometry(radius, 50);
 
@@ -158,7 +159,13 @@ export function createMap(scene,x,z, radius ) {
 const geometry = new THREE.CircleGeometry(radius, 32);
 
 // 2. Create a material (side: DoubleSide lets you see it from both front and back)
-const material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+const material = new THREE.MeshPhysicalMaterial({ 
+  color: COLORS.swamp,
+  roughness: 0.1,       // Lower values make reflections sharper
+  metalness: 0.1,       // Gives a slight metallic tint to reflections
+  transmission: 0.6,    // Glass-like transparency (0 = opaque, 1 = see-through)
+  ior: 1.5,       
+  side: THREE.DoubleSide });
 
 // 3. Combine them into a mesh and add to your scene
 const circle = new THREE.Mesh(geometry, material);
