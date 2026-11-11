@@ -165,6 +165,8 @@ const material = new THREE.MeshPhysicalMaterial({
   metalness: 0.1,       // Gives a slight metallic tint to reflections
   transmission: 0.6,    // Glass-like transparency (0 = opaque, 1 = see-through)
   ior: 1.5,       
+  emissive: 0x00ffaa,       // The color of the glow
+  emissiveIntensity: 2.0,    // Push this above 1.0 to trigger bloom
   side: THREE.DoubleSide });
 
 // 3. Combine them into a mesh and add to your scene

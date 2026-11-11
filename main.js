@@ -14,6 +14,8 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 import { HalftonePass } from 'three/addons/postprocessing/HalftonePass.js';
 import { LUTPass } from 'three/addons/postprocessing/LUTPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
 
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
@@ -107,7 +109,7 @@ let lavender = 0xE4E0FF
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( COLORS.ambientL, 2 ); // soft white light
+const light = new THREE.AmbientLight( COLORS.ambientL, 1 ); // soft white light
 light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
 
@@ -195,6 +197,15 @@ loadArchitecture(); // load the base and other architecture
   const halftonePass = new HalftonePass( params );
   //composer.addPass( halftonePass );
 
+
+
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight), 
+    0.1,  // Glow strength
+    0.4,  // Glow radius
+    0.95  // Threshold (only objects brighter than this will glow)
+);
+composer.addPass(bloomPass);
 
 
   const dotScreen = new ShaderPass( DotScreenShader );
