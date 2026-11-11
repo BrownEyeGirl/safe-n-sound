@@ -22,7 +22,7 @@ export class Can {
             color: 0x04D9FF,
             metalness: 1.8,
             roughness: 0.3, 
-            emissive: 0xBC13FE,       // The color of the glow
+            emissive: 0x04D9FF,       // The color of the glow
             emissiveIntensity: 2.0,    // Push this above 1.0 to trigger bloom
         });
 
