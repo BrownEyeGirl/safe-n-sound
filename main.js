@@ -109,10 +109,13 @@ let lavender = 0xE4E0FF
 
 
 // to see, ambient light 
-const light = new THREE.AmbientLight( COLORS.ambientL, 1 ); // soft white light
+const light = new THREE.AmbientLight( COLORS.ambientL, 2 ); // soft white light
 light.distance = 10000; // size of perlin noise snowdrift map 
 scene.add( light );
 
+const sun = new THREE.DirectionalLight(0xffffff, 0);
+sun.position.set(1000, 2000, 1000);
+scene.add(sun);
 
 let hills = createHills(); 
 scene.add(hills);

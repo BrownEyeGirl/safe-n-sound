@@ -165,8 +165,8 @@ const material = new THREE.MeshPhysicalMaterial({
   metalness: 0.1,       // Gives a slight metallic tint to reflections
   transmission: 0.6,    // Glass-like transparency (0 = opaque, 1 = see-through)
   ior: 1.5,       
-  emissive: 0x00ffaa,       // The color of the glow
-  emissiveIntensity: 2.0,    // Push this above 1.0 to trigger bloom
+  emissive: 0x39FF14,       // The color of the glow
+  emissiveIntensity: 1.5,    // Push this above 1.0 to trigger bloom
   side: THREE.DoubleSide });
 
 // 3. Combine them into a mesh and add to your scene
@@ -282,10 +282,13 @@ export function generateWalls(cx = 0, cz = 0, radius = 3000, count = 20) {
   // Load the texture and build the geometry ONCE, then reuse them
   const texture = loader.load('media/buildings_imgs/wall1.jpg');
   const geometryImg = new THREE.PlaneGeometry(width, width);
-  const materialImg = new THREE.MeshBasicMaterial({
-    map: texture,
-    side: THREE.DoubleSide
-  });
+  const materialImg = new THREE.MeshStandardMaterial({
+  map: texture,
+  roughness: 1,      // fully matte, no shiny highlights
+  metalness: 0,      // non-metal
+  side: THREE.DoubleSide
+});
+
 
   for (let i = 0; i < count; i++) {
     const radians = (i / count) * Math.PI * 2;   // angle only, no cx here
@@ -293,11 +296,11 @@ export function generateWalls(cx = 0, cz = 0, radius = 3000, count = 20) {
     // offset from the circle's center
     const x = cx + radius * Math.cos(radians);
     const z = cz + radius * Math.sin(radians);
-    const y = width;
+    const y = heightAt(x,z)+50;
 
     const wall = new THREE.Mesh(geometryImg, materialImg);
-    wall.position.set(x, y-150, z);
-    wall.lookAt(cx, y-150, cz);                      // face the NEW center
+    wall.position.set(x, y, z);
+    wall.lookAt(cx, y, cz);                      // face the NEW center
     walls.add(wall);
   }
 
