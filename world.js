@@ -4,158 +4,89 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as COLORS from './style/colors.js'
 
 
-const SEED = 69; // seed for snowdrifts
+// Perlin noise: three.js addon, based on Ken Perlin's "Improved Noise" (2002).
+// Docs:   https://threejs.org/docs/pages/ImprovedNoise.html
+// Origin: https://cs.nyu.edu/~perlin/noise/
+// Paper:  K. Perlin, "Improving Noise", ACM Trans. Graph. 21(3), 2002, pp. 681-682.
+//         https://doi.org/10.1145/566654.566636
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 
-// --- Perlin noise (2D) ---
+const SEED = 69;           // shifts the noise field, so a new seed gives new hills
+const MAX_HEIGHT = 50;     // height of the rolling hills
+const FIELD_RADIUS = 6000; // distance from the center where the ground becomes flat
 
-// Gives each grid corner a repeatable "random" direction (an angle)
-function cornerAngle(i, j) {
-  const s = Math.sin(i * 127.1 + j * 311.7 + SEED) ;
-  return (s - Math.floor(s)) * Math.PI * 2;
-}
-
-// How much the point (x, y) lines up with the direction at corner (i, j)
-function corner(i, j, x, y) {
-  const a = cornerAngle(i, j);
-  return Math.cos(a) * (x - i) + Math.sin(a) * (y - j);
-}
-
-const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10); // smooths 0-1 so there are no hard edges
-const lerp = (t, a, b) => a + t * (b - a);               // blend from a to b
-
-function perlin(x, y) {
-  const i = Math.floor(x), j = Math.floor(y);  // which grid cell we're in
-  const u = fade(x - i), v = fade(y - j);      // where inside the cell (smoothed)
-
-  // Blend the four corners: along x twice, then along y
-  return lerp(v,
-    lerp(u, corner(i, j, x, y),     corner(i + 1, j, x, y)),
-    lerp(u, corner(i, j + 1, x, y), corner(i + 1, j + 1, x, y)));
-}
-
-/* Height at any world position */
-const MAX_HEIGHT = 50;   // height of the tallest mountains
-const FIELD_RADIUS = 6000; // distance from the center where the ground becomes totally flat
-
-const PEAK_HEIGHT = 200; // how tall the central peak is, on top of the other mountains
-const PEAK_RADIUS = 200; // how wide its base is
-
-
-// 0 below a, 1 above b, smooth in between
-const smooth = (a, b, x) => {
-  const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1);
-  return t * t * (3 - 2 * t);
-};
-
-// Large hills at specific points: [x, z, height, radius, flat top radius]
+// Large hills: [x, z, height, radius, flat top radius]
 const BIG_HILLS = [
   [1200, -800, 150, 2050, 100],
   [-1500, 400, 300, 950, 60],
   [600, 1500, 380, 600, 150],
 ];
-// Height added by the large hills at a point (same falloff shape as the central peak)
+
+const noise = new ImprovedNoise();
+
+// Noise in roughly -1..1. The z value is a fixed fractional offset: this noise
+// returns 0 at whole-number coordinates, so we avoid sampling on the grid.
+const perlin = (x, y) => noise.noise(x, y, SEED + 0.5);
+
+// Height added by the big hills at a point
 function bigHillsAt(x, z) {
   let sum = 0;
   for (const [hx, hz, h, r, flat] of BIG_HILLS) {
-    const dist = Math.hypot(x - hx, z - hz); // distance from this hill's center
-    const t = Math.min(1, Math.max(0, dist - flat) / (r - flat)); // 0 on the flat top, 1 at the base edge
-    sum += Math.pow(1 - t, 2) * h;
+    const dist = Math.hypot(x - hx, z - hz);
+    const t = THREE.MathUtils.clamp((dist - flat) / (r - flat), 0, 1); // 0 on the flat top, 1 at the base
+    sum += (1 - t) ** 2 * h;
   }
   return sum;
 }
 
-// Rolling hills: perlin noise that fades to flat toward FIELD_RADIUS
+// Rolling hills: noise that fades to flat toward FIELD_RADIUS
 function hillsAt(x, z) {
   const n = (perlin(x * 0.01, z * 0.02) + 0.05 * perlin(x * 0.01, z * 0.03)) * 0.5;
-  const dist = Math.hypot(x, z); // distance from the center
-
-  const d = Math.min(1, dist / FIELD_RADIUS);
+  const d = Math.min(1, Math.hypot(x, z) / FIELD_RADIUS);
   const centerBoost = 1 - d * d * (3 - 2 * d);
-
   return n * centerBoost * MAX_HEIGHT;
 }
 
-// Final terrain: hills plus the central peak, flat summit, and crater
-export function heightAt(x, z) {
-  let height
-  if(bigHillsAt(x,z) > 60) { // make hills flat, no water damage 
-    height = bigHillsAt(x,z) + hillsAt(x, z)/5; 
-  }
-  else{ // if not a hill, add peaks from water damage
-   height = hillsAt(x, z) + bigHillsAt(x,z) //+ peak * PEAK_HEIGHT; // the terrain as before
-  }
-
-  return height;
+// On big hills the rolling bumps are flattened to 1/5 (no water damage)
+function heightFrom(x, z, big) {
+  return big + hillsAt(x, z) * (big > 60 ? 0.2 : 1);
 }
 
+export const heightAt = (x, z) => heightFrom(x, z, bigHillsAt(x, z));
 
-
-
-/* Hills/Snowdrifts mesh */
 export function createHills(size = 5000, segments = 1000) {
   const geo = new THREE.PlaneGeometry(size, size, segments, segments);
   geo.rotateX(-Math.PI / 2); // lay it flat so y is up
 
-    const low = new THREE.Color(COLORS.hillColors[0]);  // field and valleys
-    const mid = new THREE.Color(COLORS.hillColors[1]);  //hillsides
-    const high = new THREE.Color(COLORS.hillColors[2]); // peaks)
-    const colors = [];
-    const pos = geo.attributes.position;
+  const [low, mid, high] = COLORS.hillColors.map((c) => new THREE.Color(c));
+  const bigGreen = new THREE.Color(COLORS.hillColors[3]);
+  const c = new THREE.Color(); // reused for every vertex
+
+  const pos = geo.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
 
   for (let i = 0; i < pos.count; i++) {
-    const h = heightAt(pos.getX(i), pos.getZ(i)); // height at this vertex
-    pos.setY(i, h);                               // move the vertex to that height
+    const x = pos.getX(i), z = pos.getZ(i);
+    const big = bigHillsAt(x, z);
+    const h = heightFrom(x, z, big);
+    pos.setY(i, h);
 
-     const t = THREE.MathUtils.clamp(h / (MAX_HEIGHT * 0.6), 0, 1); // 0 = low, 1 = high
+    // Color by height: low -> mid -> high, then blend toward green on big hills
+    const t = THREE.MathUtils.clamp(h / (MAX_HEIGHT * 0.6), 0, 1);
+    if (t < 0.5) c.copy(low).lerp(mid, t * 2);
+    else c.copy(mid).lerp(high, (t - 0.5) * 2);
+    c.lerp(bigGreen, THREE.MathUtils.smoothstep(big, 40, 60));
 
-// First half of the height range blends low to mid, second half blends mid to high
- const c = t < 0.5
-  ? low.clone().lerp(mid, t * 2)
-  : mid.clone().lerp(high, (t - 0.5) * 2);          // blend the three colors
-  const x = pos.getX(i), z = pos.getZ(i);
-    pos.setY(i, h); 
-
-    // ...existing t and color blend code that makes `c`...
-    //in(x * 0.9, z * 0.1); 
-    //c.multiplyScalar(grain);                            // lighten or darken this vertex
-  
-    colors.push(c.r, c.g, c.b);
+    c.toArray(colors, i * 3);
   }
 
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
-  geo.computeVertexNormals(); // so lighting looks right
-
-  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true})); // vertexColors: true }));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geo.computeVertexNormals();
+  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true }));
 }
 
 export function createMap(scene,x,z, radius ) {
 
-    // 1. Create the geometry (width, height, widthSegments, heightSegments)
-    //const geometry = new THREE.CircleGeometry(radius, 50);
-
-    //const textureLoader = new THREE.TextureLoader();
-   //const texture = textureLoader.load('/media/bluescreen.png');
-
-// 3. Create the material using the texture as the map
-//const material = new THREE.MeshBasicMaterial({ 
-  //map: texture, 
-  //side: THREE.DoubleSide // Optional: makes the photo visible from both sides
-//});
-
-
-    // 2. Create a material (DoubleSide allows it to be seen from the back)
-   /*const material = new THREE.MeshBasicMaterial({ 
-    color: 0x00ff00, 
-    });
-  
-    // 3. Combine into a mesh
-    const planeMesh = new THREE.Mesh(geometry, material);
-
-    // 4. By default, planes are vertical (facing the Z-axis). 
-    // To make it a horizontal floor, rotate it 90 degrees around the X-axis:
-    planeMesh.rotation.x = -Math.PI / 2;
-    planeMesh.position.y=0*/
-    // 1. Create the circle geometry: radius = 5, segments = 32
 const geometry = new THREE.CircleGeometry(radius, 32);
 
 // 2. Create a material (side: DoubleSide lets you see it from both front and back)
@@ -262,6 +193,7 @@ export function generatePlants(item) { //
       //flower.scale.set(s, s, s);
 
       flower.rotation.y = Math.random() * Math.PI * 2;
+      flower.castShadow = true; 
 
       items.add(flower);
     }
@@ -306,3 +238,45 @@ export function generateWalls(cx = 0, cz = 0, radius = 3000, count = 20) {
 
   return walls;
 }
+
+
+export function createCloudAt(scene, x, z, y = 50, s) {
+  const cloudGroup = new THREE.Group();
+  
+  // Load a soft, radial cloud PNG texture
+  const textureLoader = new THREE.TextureLoader();
+  const cloudTexture = textureLoader.load('cloud.png');
+
+  const material = new THREE.SpriteMaterial({
+    map: cloudTexture,
+    transparent: true,
+    opacity: 0.6,
+    depthWrite: false // Prevents ugly square borders overlapping
+  });
+
+  // Cluster 5 to 8 puffs together to form one cloud
+  const puffCount = 6;
+  for (let i = 0; i < puffCount; i++) {
+    const sprite = new THREE.Sprite(material);
+    
+    // Randomize puff offsets around the center of the cloud
+    sprite.position.set(
+      (Math.random() - 0.5) * 15,
+      (Math.random() - 0.5) * 4,
+      (Math.random() - 0.5) * 15
+    );
+
+    
+    // Vary puff sizes
+    const scale = 15 + Math.random() * 10 *s ;
+    
+    cloudGroup.add(sprite);
+  }
+
+  // Position the entire cloud at your target X and Z
+  cloudGroup.position.set(x, y, z);
+  return cloudGroup;
+  // Usage:
+
+}
+

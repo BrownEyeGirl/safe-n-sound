@@ -19,7 +19,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 
 // imported functions 
 import { heightAt } from './world.js'; // imports the hightAt function, gets Z at specific x,y
-import { createHills, createMap, createBase, generatePlants, generateWalls } from './world.js';
+import { createHills, createMap, createBase, generatePlants, generateWalls, createCloudAt } from './world.js';
 import { createPlayer, updatePlayer } from './characters/player.js';
 import { renderParticles } from './boids.js';
 import { createCyborg, cyborgHeight, cyborgWidth } from './characters/cyborg.js'; 
@@ -113,8 +113,9 @@ const light = new THREE.AmbientLight( COLORS.ambientL, 0.8); // soft white light
 light.distance = 1000; // size of perlin noise snowdrift map 
 scene.add( light );
 
-const sun = new THREE.DirectionalLight(0x0034AB, 1);
-sun.position.set(1000, 2000, 1000);
+const sun = new THREE.DirectionalLight(0xffffff, 1);
+sun.position.set(1000, 2000, 100);
+sun.castShadow = true; 
 scene.add(sun);
 
 let hills = createHills(); 
@@ -146,7 +147,7 @@ loadArchitecture(); // load the base and other architecture
   }
 
   if(!birdsEyeView) {
-    camera = new THREE.PerspectiveCamera(105, window.innerWidth / window.innerHeight, 0.4, 1000);
+    camera = new THREE.PerspectiveCamera(105, window.innerWidth / window.innerHeight, 0.4, 5000);
     
     cyborg = createCyborg(scene, camera); 
     player = createPlayer(scene);
@@ -208,7 +209,7 @@ loadArchitecture(); // load the base and other architecture
     0.4,  // Glow radius
     0.95  // Threshold (only objects brighter than this will glow)
 );
-composer.addPass(bloomPass);
+//composer.addPass(bloomPass);
 
 
   const dotScreen = new ShaderPass( DotScreenShader );
@@ -302,6 +303,8 @@ function loadArchitecture() {
   scene.add(loadBuilding(base)); 
   scene.add(loadBuilding(parking_garage));
   scene.add(loadBuilding(dumpster)); 
+const myCloud = createCloudAt(120, -85, 60, 30);
+scene.add(myCloud);
 }
 
 function loadAnimals() {
@@ -323,7 +326,7 @@ function loadReplen() {
   let z = 800
   let radius = 500
 
- scene.add(generateWalls(x,z,radius,20)); // x,z,radius,count
+ scene.add(generateWalls(x,z,radius,10)); // x,z,radius,count
  spawnCans(scene, x,z,radius,100);  //x,z,radius,count
  createMap(scene, x,z,radius); 
 
@@ -396,7 +399,7 @@ function mount() {
   rig.detach();                          // camera + controls off the player
   cyborg.rotation.y = player.rotation.y; // so the view doesn't jump
   cyborg.add(player);                    // player rides as a child of the cyborg
-  player.position.set(cyborgWidth/3, cyborgHeight+10, 0);
+  player.position.set(cyborgWidth/3, cyborgHeight/2, 0);
   player.rotation.copy(cyborg.rotation)
   cyborgGroundOffset = cyborg.position.y - heightAt(cyborg.position.x, cyborg.position.z);
   rig = attachCamera(mounted,camera, cyborg, document.body, {
@@ -409,7 +412,7 @@ function mount() {
 function dismount() {
   rig.detach();
   scene.attach(player); // keeps the player's world position
-  player.position.x += 10;
+  c.x += 10;
   player.position.y = heightAt(player.position.x, player.position.z);
   player.rotation.copy(cyborg.rotation)
   rig = attachCamera(mounted,camera, player);
