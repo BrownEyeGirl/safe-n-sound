@@ -89,7 +89,7 @@ export function createMap(scene,x,z, radius ) {
 
 const geometry = new THREE.CircleGeometry(radius, 32);
 
-// 2. Create a material (side: DoubleSide lets you see it from both front and back)
+// create material 
 const material = new THREE.MeshPhysicalMaterial({ 
   color: COLORS.swamp,
   roughness: 0.1,       // Lower values make reflections sharper
@@ -98,18 +98,19 @@ const material = new THREE.MeshPhysicalMaterial({
   ior: 1.5,       
   emissive: 0x39FF14,       // The color of the glow
   emissiveIntensity: 1.5,    // Push this above 1.0 to trigger bloom
-  side: THREE.DoubleSide });
+  //side: THREE.DoubleSide  // makes material double sided, not needed for this purpose 
+});
 
-// 3. Combine them into a mesh and add to your scene
+// make circular mesh 
 const circle = new THREE.Mesh(geometry, material);
 circle.rotation.x = -Math.PI/2; 
 circle.position.x = x; 
 circle.position.z = z; 
 circle.position.y = 0.5; 
 scene.add(circle);
-
 }
 
+/* Creates home based (not used) */ 
 export function createBase() {
   // 1. Create a square geometry (width = 2, height = 2)
   const geometry = new THREE.PlaneGeometry(20, 20,20);
