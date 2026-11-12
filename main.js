@@ -105,7 +105,7 @@ let lavender = 0xE4E0FF
   // scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(COLORS.backgroundFog)
-  scene.fog = new THREE.Fog(COLORS.backgroundFog, 0, 1000); // new fog, darker, shorter range
+  scene.fog = new THREE.Fog(COLORS.backgroundFog, 0, 2000); // new fog, darker, shorter range
 
 
 // to see, ambient light 
