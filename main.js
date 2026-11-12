@@ -241,7 +241,7 @@ animate()
 // check if mounted 
 let mount_rad = 700
 const CYBORG_SPEED = 60; // attempt to move cyborhg
-const PLAYER_SPEED = 30; 
+const PLAYER_SPEED = 20; 
 
 function animate() {
 
