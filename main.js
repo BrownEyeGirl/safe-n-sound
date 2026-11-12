@@ -113,7 +113,7 @@ const light = new THREE.AmbientLight( COLORS.ambientL, 0.8); // soft white light
 light.distance = 1000; // size of perlin noise snowdrift map 
 scene.add( light );
 
-const sun = new THREE.DirectionalLight(0xffffff, 1);
+const sun = new THREE.DirectionalLight(0x0034AB, 1);
 sun.position.set(1000, 2000, 1000);
 scene.add(sun);
 
